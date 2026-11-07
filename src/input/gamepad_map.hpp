@@ -2,8 +2,12 @@
 // Moonlight gamepad state (Xbox layout, platf::gamepad_state_t) → PS5 virtual DualSense state.
 // Portable so it can be unit-tested on the build host; docs/input-mapping.md lists the table.
 #pragma once
+#include <algorithm>
 #include <array>
+#include <chrono>
+#include <cstddef>
 #include <cstdint>
+#include <utility>
 
 namespace prospero {
 
@@ -14,6 +18,53 @@ inline constexpr uint32_t start = 0x0010, back = 0x0020, left_stick = 0x0040, ri
 inline constexpr uint32_t left_button = 0x0100, right_button = 0x0200, home = 0x0400;
 inline constexpr uint32_t a = 0x1000, b = 0x2000, x = 0x4000, y = 0x8000;
 inline constexpr uint32_t touchpad = 0x100000;
+// Not Moonlight's (it uses bits up to 0x200000): the keyboard pad sets it for Ctrl+Backspace (keyboard_pad.hpp), which
+// switches the pad to its device's next profile at once; map_gamepad never passes it on to the console.
+inline constexpr uint32_t switch_seat = 0x40000000;
+// L1+L2+R1+R2 held together for switch_hold does the same on a controller (device_profiles.hpp): the buttons here and
+// both triggers pulled to switch_trigger. Moonlight's on-screen controller has all four but no L3 or R3. It has to be
+// held, as a game may have all four down for a moment.
+inline constexpr uint32_t switch_chord = left_button | right_button;
+}
+// Nearly all the way: a trigger half pulled in a racing game doesn't count. The on-screen controller sends 255.
+inline constexpr uint8_t switch_trigger = 200;
+inline constexpr std::chrono::seconds switch_hold{2};
+// Every switch puts a notification on the screen of everyone streaming, and Ctrl+Backspace could fill it. So a controller
+// switches freely once round its device's profiles, and then, or after a refused switch (no other profile free, only
+// one profile), waits switch_cooldown, ignoring its switches meanwhile. One per controller.
+inline constexpr std::chrono::seconds switch_cooldown{20};
+class SwitchBudget {
+public:
+    using clock = std::chrono::steady_clock;
+    bool allowed(clock::time_point now) const { return now >= until_; }
+    // While it waits: whole seconds left, rounded up.
+    long long seconds_left(clock::time_point now) const {
+        if (now >= until_) return 0;
+        return std::chrono::ceil<std::chrono::seconds>(until_ - now).count();
+    }
+    // The player is told once per wait (the first switch that comes during it), so the wait's own notice can't fill the
+    // screen either.
+    bool tell_once() { return !std::exchange(told_, true); }
+    // round: how many profiles the device switches between; that many switches make a round.
+    void switched(clock::time_point now, std::size_t round) {
+        if (++count_ >= std::max<std::size_t>(round, 1)) rest(now);
+    }
+    void refused(clock::time_point now) { rest(now); }
+
+private:
+    void rest(clock::time_point now) {
+        until_ = now + switch_cooldown;
+        count_ = 0;
+        told_ = false;
+    }
+    clock::time_point until_{};
+    std::size_t count_ = 0;
+    bool told_ = false;
+};
+constexpr bool switch_at_once(uint32_t flags) { return flags & moonlight::switch_seat; }
+constexpr bool holds_switch(uint32_t flags, uint8_t lt, uint8_t rt) {
+    return switch_at_once(flags) ||
+           ((flags & moonlight::switch_chord) == moonlight::switch_chord && lt >= switch_trigger && rt >= switch_trigger);
 }
 
 // ScePadButton bits (src/platform/ps5/pad.h).

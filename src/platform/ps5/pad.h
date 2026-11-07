@@ -53,6 +53,9 @@ uint32_t ps_pad_default_user(void);
 // Adds a DualSense-type virtual controller for user_id. Returns 0 or a negative error/errno.
 // A new controller makes the system ask "Who's using this controller?" once.
 int ps_pad_open(uint32_t user_id, ps_pad **out);
+// The system's id for the pad: the handle the add ioctl gave, which SceShellCore logs as the device id (0x34030d on
+// 10.20; profile_seat.h binds a profile to it). 0 for NULL.
+uint32_t ps_pad_device_id(const ps_pad *pad);
 // Feeds one state; it stays in effect until the next one.
 int ps_pad_send(ps_pad *pad, const ps_pad_state *state);
 // Touch and motion arrive apart from the buttons; each stays in effect until changed. Layouts: docs/re/pad-input.md.

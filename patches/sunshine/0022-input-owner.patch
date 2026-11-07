@@ -1,0 +1,46 @@
+ProsperoSunshine: tell the platform whose input it passes on
+
+The PS5 host gives each paired device the console profiles it may play as. Such a device plays through its controllers
+(or its keyboard's own pad) as those profiles. Its keyboard and mouse would still reach the console's shared keyboard and
+mouse, which belong to no profile the host chose: with more than one profile signed in, the console asks who uses them,
+and whoever answers picks any profile.
+
+passthrough_next_message() now tells the platform, through the new platf::set_input_owner, which session's input it
+passes on, by the session's feedback queue (the one platf::set_gamepad_owner was given), and clears it afterwards. The
+PS5 platform drops the shared keyboard and mouse input of a device with its own profiles.
+
+--- a/src/platform/common.h
++++ b/src/platform/common.h
+@@ -1315,6 +1315,14 @@
+    */
+   void set_gamepad_owner(const feedback_queue_t &feedback_queue, std::string_view owner);
+   /**
++   * @brief Tell the platform whose input the calling thread passes on next.
++   *
++   * The PS5 host keeps the console's shared keyboard and mouse from a device that may only watch.
++   *
++   * @param feedback_queue The session's feedback queue, as set_gamepad_owner was given it; null once done.
++   */
++  void set_input_owner(const feedback_queue_t *feedback_queue);
++  /**
+    * @brief Release gamepad resources.
+    *
+    * @param input Platform input backend that receives the event.
+--- a/src/input.cpp
++++ b/src/input.cpp
+@@ -2548,6 +2548,7 @@
+ #endif
+ 
+     // Send the batched input to the OS
++    platf::set_input_owner(&input->feedback_queue);
+     switch (util::endian::little(payload->magic)) {
+       case MOUSE_MOVE_REL_MAGIC_GEN5:
+         passthrough(input, (PNV_REL_MOUSE_MOVE_PACKET) payload);
+@@ -2594,6 +2595,7 @@
+         passthrough(input, (PSS_CONTROLLER_BATTERY_PACKET) payload);
+         break;
+     }
++    platf::set_input_owner(nullptr);
+     return true;
+   }
+ 

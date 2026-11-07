@@ -24,6 +24,8 @@ int ps_keyboard_open(uint32_t user_id, ps_keyboard **out);
 int ps_keyboard_send(ps_keyboard *keyboard, uint8_t modifiers, const uint8_t *usages, uint8_t count);
 // Releases every key and removes the keyboard. NULL is harmless.
 int ps_keyboard_close(ps_keyboard *keyboard);
+// The handle the add returned; the bus knows the keyboard as handle | 3 << 48 (profile_seat.h). 0 for NULL.
+uint32_t ps_keyboard_device_id(const ps_keyboard *keyboard);
 
 // Adds a mouse for user_id; the system shows "Mouse connected". Returns 0 or a negative errno.
 int ps_mouse_open(uint32_t user_id, ps_mouse **out);
@@ -31,6 +33,8 @@ int ps_mouse_open(uint32_t user_id, ps_mouse **out);
 int ps_mouse_send(ps_mouse *mouse, int16_t dx, int16_t dy, uint8_t buttons, int8_t wheel, int8_t tilt);
 // Releases every button and removes the mouse. NULL is harmless.
 int ps_mouse_close(ps_mouse *mouse);
+// The handle the add returned; the bus knows the mouse as handle | 4 << 48. 0 for NULL.
+uint32_t ps_mouse_device_id(const ps_mouse *mouse);
 
 #ifdef __cplusplus
 }

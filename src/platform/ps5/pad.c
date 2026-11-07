@@ -100,6 +100,11 @@ int ps_pad_open(uint32_t user_id, ps_pad **out)
     return 0;
 }
 
+uint32_t ps_pad_device_id(const ps_pad *pad)
+{
+    return pad ? (uint32_t)pad->handle : 0;
+}
+
 static int insert(ps_pad *pad)
 {
     struct { uint32_t handle; uint32_t pad; uint64_t state; uint8_t zero; uint8_t pad2[7]; } request = {

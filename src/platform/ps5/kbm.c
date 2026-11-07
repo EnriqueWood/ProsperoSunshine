@@ -151,3 +151,13 @@ int ps_mouse_close(ps_mouse *mouse)
     free(mouse);
     return rc;
 }
+
+uint32_t ps_keyboard_device_id(const ps_keyboard *keyboard)
+{
+    return keyboard ? (uint32_t)keyboard->device.handle : 0;
+}
+
+uint32_t ps_mouse_device_id(const ps_mouse *mouse)
+{
+    return mouse ? (uint32_t)mouse->device.handle : 0;
+}

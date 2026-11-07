@@ -46,6 +46,38 @@ int main() {
     static_assert(wakes_pad(moonlight::a, 0, 0, 0, 0, 0, 0));
     static_assert(wakes_pad(0, 0, trigger_threshold, 0, 0, 0, 0));
     static_assert(wakes_pad(0, 0, 0, 0, -stick_wake, 0, 0) && wakes_pad(0, 0, 0, 0, 0, 0, -32768));
+    // Switching profiles: L1+L2+R1+R2 together with both triggers nearly all the way, or the keyboard pad's
+    // Ctrl+Backspace bit, which never reaches the console.
+    static_assert(holds_switch(moonlight::switch_chord, 255, 255) && holds_switch(moonlight::switch_chord | moonlight::a, 255, 255));
+    static_assert(holds_switch(moonlight::switch_chord, switch_trigger, switch_trigger));
+    static_assert(!holds_switch(moonlight::switch_chord, switch_trigger - 1, 255) && !holds_switch(moonlight::switch_chord, 255, 0));
+    static_assert(!holds_switch(moonlight::left_button, 255, 255) && !holds_switch(0, 255, 255));
+    static_assert(holds_switch(moonlight::switch_seat, 0, 0));
+    static_assert(!holds_switch(moonlight::left_button | moonlight::right_button | moonlight::left_stick | moonlight::right_stick, 0, 0));
+    static_assert(!holds_switch(0, 0, 0));
+    static_assert(map_gamepad(moonlight::switch_seat, 0, 0, 0, 0, 0, 0).buttons == 0);
+    static_assert(switch_at_once(moonlight::switch_seat) && !switch_at_once(moonlight::switch_chord));
+    // A round of switches is free, then the controller waits switch_cooldown and is told once.
+    {
+        using clock = std::chrono::steady_clock;
+        const auto t = clock::now();
+        SwitchBudget budget;
+        assert(budget.allowed(t));
+        budget.switched(t, 2);  // A to B
+        assert(budget.allowed(t));
+        budget.switched(t + std::chrono::seconds(1), 2);  // B back to A: the round is done
+        assert(!budget.allowed(t + std::chrono::seconds(2)));
+        assert(budget.seconds_left(t + std::chrono::seconds(2)) == 19);
+        assert(budget.tell_once() && !budget.tell_once());
+        assert(budget.allowed(t + std::chrono::seconds(1) + switch_cooldown));
+        budget.switched(t + std::chrono::seconds(30), 2);  // a new round starts
+        assert(budget.allowed(t + std::chrono::seconds(30)));
+        budget.refused(t + std::chrono::seconds(31));  // a refused switch waits too, and tells again
+        assert(!budget.allowed(t + std::chrono::seconds(40)) && budget.tell_once());
+        SwitchBudget single;
+        single.switched(t, 0);  // a round of at least one
+        assert(!single.allowed(t));
+    }
     std::cout << "PASS: gamepad mapping (face, system, sticks, triggers, trigger effects, PS and Create for the host only, "
-                 "a guest's pad opens on its first use)\n";
+                 "a guest's pad opens on its first use, the profile switch)\n";
 }

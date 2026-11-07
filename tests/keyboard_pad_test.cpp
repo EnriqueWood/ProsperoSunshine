@@ -9,7 +9,7 @@ using namespace std::chrono_literals;
 
 namespace {
 constexpr uint16_t enter = 0x0D, backspace = 0x08, esc = 0x1B, tab = 0x09, space = 0x20;
-constexpr uint16_t left = 0x25, up = 0x26, right = 0x27, down = 0x28, f1 = 0x70, f2 = 0x71;
+constexpr uint16_t left = 0x25, up = 0x26, right = 0x27, down = 0x28, f1 = 0x70, f2 = 0x71, f5 = 0x74;
 constexpr uint16_t shift = 0x10, ctrl = 0x11, alt = 0x12, lshift = 0xA0, lctrl = 0xA2, ralt = 0xA5;
 
 uint32_t press(KeyboardPad &pad, uint16_t vk, std::chrono::steady_clock::time_point at) {
@@ -24,7 +24,7 @@ constexpr bool common_keys(Profile profile) {
     using namespace moonlight;
     const bool alt_free = !key_control(profile, 0x12) && !key_control(profile, 0xA4) && !key_control(profile, 0xA5);
     return key_control(profile, enter) == a && key_control(profile, backspace) == b && key_control(profile, esc) == start &&
-           key_control(profile, f1) == home && key_control(profile, f2) == back && alt_free;
+           key_control(profile, f1) == home && key_control(profile, f2) == back && !key_control(profile, f5) && alt_free;
 }
 }
 
@@ -658,6 +658,28 @@ int main() {
     assert(keyboard_pad_sensitivity("5") == min_sensitivity && keyboard_pad_sensitivity("50000") == max_sensitivity);
     assert(keyboard_pad_sensitivity("fast") == default_sensitivity && keyboard_pad_sensitivity("150%") == default_sensitivity);
 
+    // Ctrl+Backspace switches the profile (the switch bit, never ○); Backspace alone stays ○, also after.
+    {
+        KeyboardPad sw;
+        const auto t = std::chrono::steady_clock::now();
+        for (const uint16_t ctrl : {uint16_t(0x11), uint16_t(0xA2), uint16_t(0xA3)}) {
+            sw.set_profile(Profile::standard);
+            sw.key(ctrl, false, t);
+            assert(sw.key(backspace, false, t));
+            assert(sw.state(t).buttons == moonlight::switch_seat);
+            assert(sw.pressed(t));  // a switch also adds the pad, as any control does
+            assert(sw.key(backspace, true, t));
+            sw.key(ctrl, true, t);
+            assert(press(sw, backspace, t) == moonlight::b);
+        }
+        // In shooter, Ctrl is ○ (crouch): the combination holds Ctrl's ○ and the switch, not a second ○ from Backspace.
+        sw.set_profile(Profile::shooter);
+        sw.key(0xA2, false, t);
+        sw.key(backspace, false, t);
+        assert(sw.state(t).buttons == (moonlight::b | moonlight::switch_seat));
+        sw.clear();
+    }
+
     std::cout << "PASS: keyboard pad (keys, sticks, shortcuts, mouse, wheel taps, seven profiles, easing, vehicle layer, "
-                 "what adds the pad, sensitivity per client, settings)\n";
+                 "what adds the pad, sensitivity per client, settings, Ctrl+Backspace switches the profile)\n";
 }
