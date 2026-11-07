@@ -40,6 +40,16 @@ int main() {
     static_assert(allowed_buttons(with_home, PadRole::guest, false) == (moonlight::a | moonlight::start));
     static_assert(allowed_buttons(with_home, PadRole::guest, true) == with_home);
     static_assert(allowed_buttons(0, PadRole::guest, false) == 0);
+    // With the console's menus given to chosen profiles, a seated pad's profile decides, not its role nor "PS for all".
+    static_assert(allowed_buttons(with_home, PadRole::guest, false, MenuAccess::allowed) == with_home);
+    static_assert(allowed_buttons(with_home, PadRole::host, false, MenuAccess::denied) == (moonlight::a | moonlight::start));
+    static_assert(allowed_buttons(with_home, PadRole::guest, true, MenuAccess::denied) == (moonlight::a | moonlight::start));
+    static_assert(allowed_buttons(with_home, PadRole::host, false, MenuAccess::by_role) == with_home);
+    static_assert(allowed_buttons(with_home, PadRole::guest, false, MenuAccess::by_role) == (moonlight::a | moonlight::start));
+    static_assert(has_menu_buttons(PadRole::guest, true, MenuAccess::by_role) && !has_menu_buttons(PadRole::guest, false, MenuAccess::by_role));
+    // Without a game in front, a pad denied the menus passes nothing; one the role decides for still does, as before.
+    static_assert(!passes_input(MenuAccess::denied, false) && passes_input(MenuAccess::denied, true));
+    static_assert(passes_input(MenuAccess::allowed, false) && passes_input(MenuAccess::by_role, false));
     // A guest's pad opens on its first use: a button, a trigger or a stick pushed far enough, not drift (issue 26).
     static_assert(!wakes_pad(0, 0, 0, 0, 0, 0, 0));
     static_assert(!wakes_pad(0, trigger_threshold - 1, 0, 3000, -3000, stick_wake - 1, -(stick_wake - 1)));

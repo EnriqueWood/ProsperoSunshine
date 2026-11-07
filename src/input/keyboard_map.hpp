@@ -77,6 +77,12 @@ constexpr uint8_t vk_usage(uint16_t vk) {
     }
 }
 
+// The keys that open the console's own menus from a keyboard seated in a profile, as PS and Create do on a controller
+// (control/menu_access.hpp): Print Screen opens the Create menu, Pause the control center. Measured on 10.20 by pressing
+// every key of a full keyboard on the home screen: no other key did, nor Ctrl+Esc, Alt+Tab, Ctrl+Alt+Del, Alt+F4,
+// Ctrl+Shift+Esc or Windows+G.
+constexpr bool opens_console_menu(uint8_t usage) { return usage == 0x46 || usage == 0x48; }
+
 // What a printable ASCII character is on a US keyboard: its key and whether it needs Shift. Usage 0 if none.
 struct AsciiKey {
     uint8_t usage;

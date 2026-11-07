@@ -10,6 +10,12 @@ int main() {
     assert(vk_usage(0x0D) == 0x28 && vk_usage(0x1B) == 0x29 && vk_usage(0x20) == 0x2C);
     assert(vk_usage(0x70) == 0x3A && vk_usage(0x7B) == 0x45 && vk_usage(0x87) == 0x73);
     assert(vk_usage(0x27) == 0x4F && vk_usage(0x25) == 0x50 && vk_usage(0x28) == 0x51 && vk_usage(0x26) == 0x52);
+    // Print Screen and Pause open the console's menus; the rest of the keyboard doesn't (10.20).
+    static_assert(opens_console_menu(vk_usage(0x2C)) && opens_console_menu(vk_usage(0x13)));
+    for (const uint16_t vk : {uint16_t('A'), uint16_t('0'), uint16_t(0x0D), uint16_t(0x1B), uint16_t(0x5D), uint16_t(0x70),
+                              uint16_t(0x71), uint16_t(0x87), uint16_t(0x26), uint16_t(0x24), uint16_t(0x91), uint16_t(0x03)})
+        assert(!opens_console_menu(vk_usage(vk)));
+    assert(!opens_console_menu(0));
     assert(vk_usage(0x60) == 0x62 && vk_usage(0x61) == 0x59 && vk_usage(0x69) == 0x61);
     assert(vk_usage(0xBF) == 0x38 && vk_usage(0xE2) == 0x64);
     assert(vk_usage(0x10) == 0 && vk_usage(0xA0) == 0 && vk_usage(0x5B) == 0);  // modifiers have no usage here
