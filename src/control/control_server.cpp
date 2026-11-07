@@ -5,8 +5,10 @@
 #include "control/stream_list.hpp"
 #include "control/http_guard.hpp"
 #include "host_control.hpp"
+#include "sunshine/platform_ps5.hpp"
 #include "sunshine/video_ps5.hpp"
 #include "web/web_login.hpp"
+#include "platform/ps5/console_users.h"
 #include "src/logging.h"
 #include "src/platform/common.h"
 #include "src/nvhttp.h"
@@ -58,7 +60,8 @@ long long seconds_since(std::chrono::steady_clock::time_point start, std::chrono
 }
 
 ControlServer::ControlServer(std::shared_ptr<safe::event_t<bool>> shutdown)
-    : shutdown_(std::move(shutdown)), modes_(platf::appdata() / "device_modes.txt") {
+    : shutdown_(std::move(shutdown)), modes_(platf::appdata() / "device_modes.txt"),
+      profiles_(platf::appdata() / "device_profiles.txt") {
     nvhttp::set_launch_listener([this](const nvhttp::launch_client_t &client) {
         modes_.remember(client.uuid, format_mode(client.width, client.height, client.fps));
     });
@@ -73,11 +76,35 @@ std::string ControlServer::handle(const std::string &line, Caller caller) {
     return handle_locked(line, caller);
 }
 
+// Once, on the first version with profiles: every device already paired keeps playing as it did, with the console asking
+// who uses each controller and any profile allowed, now written down as "free" (the web page marks it risky). The marker
+// file keeps it from running again, so a device paired later starts unset. Run on the first command that shows devices,
+// when Sunshine has read its pairings.
+void ControlServer::migrate_profiles() {
+    if (profiles_migrated_) return;
+    profiles_migrated_ = true;
+    const auto marker = platf::appdata() / "device_profiles.migrated";
+    std::error_code ec;
+    if (std::filesystem::exists(marker, ec)) return;
+    ProfileSet any;
+    any.free = true;
+    int kept = 0;
+    for (const auto &client : nvhttp::get_all_clients()) {
+        const std::string uuid = client.value("uuid", "");
+        if (uuid.empty() || profiles_.get(uuid)) continue;
+        profiles_.set(uuid, any);
+        ++kept;
+    }
+    std::ofstream(marker) << "device profiles introduced; devices paired before kept a free choice\n";
+    BOOST_LOG(info) << "Control: profiles introduced, "sv << kept << " device(s) paired before keep their free choice of profile"sv;
+}
+
 std::string ControlServer::handle_locked(const std::string &line, Caller caller) {
     auto &baseline = sent_[caller == Caller::web ? 1 : 0];
     std::istringstream in(line);
     std::string command;
     in >> command;
+    if (command == "DEVICES" || command == "PROFILES" || command == "SETPROFILES") migrate_profiles();
     if (command == "STATUS") {
         const auto pending = nvhttp::get_pending_pairings().size();
         std::string answer = "OK running="s + (proc::proc.running() > 0 ? "1" : "0") +
@@ -207,8 +234,69 @@ std::string ControlServer::handle_locked(const std::string &line, Caller caller)
         // Removing the pairing only stops new connections; a running stream of this device ends here.
         rtsp_stream::terminate_sessions_by_cert(cert);
         modes_.forget(uuid);
+        profiles_.forget(uuid);
+        DeviceSeats(platf::appdata() / "device_seats.txt").forget(uuid);
         BOOST_LOG(info) << "Control: a paired device was removed"sv;
         return "OK removed";
+    }
+    if (command == "USERS") {
+        ps_console_user users[max_profiles];
+        const int count = ps_console_users(users, static_cast<int>(max_profiles));
+        if (count < 0) return "ERR the console's profiles can't be read (" + std::to_string(-count) + ")";
+        std::string out;
+        for (int i = 0; i < count; ++i) out += "OK " + format_user_id(users[i].id) + ' ' + one_line(users[i].name) + '\n';
+        return out + "END";
+    }
+    if (command == "PROFILES") {
+        std::string out;
+        for (const auto &[uuid, set] : profiles_.all()) out += "OK " + uuid + ' ' + format_profiles(set) + '\n';
+        return out + "END";
+    }
+    if (command == "SETPROFILES") {
+        std::string uuid, text, extra;
+        in >> uuid >> text;
+        if (uuid.empty() || text.empty() || (in >> extra)) return "ERR usage: SETPROFILES <uuid> <profiles|unset>";
+        if (nvhttp::get_cert_by_uuid(uuid).empty()) return "ERR no such device";
+        if (text == "unset") {
+            profiles_.set(uuid, std::nullopt);
+            BOOST_LOG(info) << "Control: a paired device's profiles were unset"sv;
+            return "OK saved";
+        }
+        const auto set = parse_profiles(text);
+        if (!set) return "ERR the profiles are not valid";
+        if (!set->users.empty()) {
+            ps_console_user users[max_profiles];
+            const int count = ps_console_users(users, static_cast<int>(max_profiles));
+            if (count < 0) return "ERR the console's profiles can't be read";
+            for (const uint32_t id : set->users) {
+                if (std::none_of(users, users + count, [id](const ps_console_user &u) { return u.id == id; }))
+                    return "ERR no profile " + format_user_id(id) + " on this console";
+            }
+        }
+        const auto before = profiles_.get(uuid);
+        profiles_.set(uuid, set);
+        // A controller of the device sitting in a profile taken away leaves it and watches until a press joins it as one
+        // the device still has; the stream goes on. Profiles added apply at the next press or switch.
+        if (!before || !(*before == *set)) {
+            // What it got beside what it had; coming from a free choice (or none set), a list takes away, adds nothing.
+            // Only a device with a running session hears of them: one whose stream ended is told nothing.
+            const std::string cert = nvhttp::get_cert_by_uuid(uuid);
+            const auto sessions = rtsp_stream::session_infos();
+            const bool streams = std::any_of(sessions.begin(), sessions.end(), [&](const auto &s) { return s.client_cert == cert; });
+            std::vector<uint32_t> added;
+            if (streams && before && !before->free)
+                for (const uint32_t id : set->users)
+                    if (std::find(before->users.begin(), before->users.end(), id) == before->users.end()) added.push_back(id);
+            platf::profiles_changed(cert, added);
+        }
+        // No ids or names in the log: it goes into the report people post.
+        BOOST_LOG(info) << "Control: a paired device's profiles were set ("sv
+                        << (set->free ? "free choice"s
+                            : set->none() ? "none"s
+                            : set->users.empty() ? "guest only"s
+                                                 : std::to_string(set->users.size()) + " profile(s)" + (set->guest ? " and guest" : ""))
+                        << ')';
+        return "OK saved";
     }
     if (command == "REPORT") {
         if (!report_listening_) return "ERR report port not open";

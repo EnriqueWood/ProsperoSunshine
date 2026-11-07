@@ -15,7 +15,13 @@
 //                                  "-" for an unknown value; sent_kbps since the last STREAMS, or since the start)
 //   ENDSTREAM <uuid>            -> ends that device's stream; the game and the others' streams go on ("OK ended" / "ERR ...")
 //   RENAME <uuid> <name>      -> gives a paired device another name ("OK renamed" / "ERR ...")
-//   UNPAIR <uuid>               -> removes a paired device and ends its stream ("OK removed" / "ERR ...")
+//   UNPAIR <uuid>               -> removes a paired device and ends its stream ("OK removed" / "ERR ..."); its profiles go
+//   USERS                       -> "OK <user id in hex> <name>" per profile on the console, signed in or not, then "END"
+//                                  (console_users.h; the name is the rest of the line)
+//   PROFILES                    -> "OK <uuid> <profiles>" per device whose profiles are set, then "END"
+//                                  (device_profiles.hpp: free, none, or ids and "guest" separated by commas)
+//   SETPROFILES <uuid> <profiles|unset> -> sets which profiles a paired device may play as; "unset" takes the setting
+//                                  away ("OK saved" / "ERR ..."). Every id must be a profile on the console.
 //   REPORT                      -> "OK port=<n>": for some seconds, <appdata>/diagnostics.txt is on that port
 //   AUTOLOAD [ON|OFF]           -> the Payload Manager's autoload list, for the app (autoload_host.hpp)
 //   WEBLOGIN                    -> "OK user=<name> enabled=<0|1>": the stored login, also while the page is off; the
@@ -33,6 +39,7 @@
 // <appdata>/control_lan opens it to the LAN for development on trusted networks (ROADMAP P9.1).
 #pragma once
 #include "control/device_modes.hpp"
+#include "control/device_profiles.hpp"
 #include "src/thread_safe.h"
 #include <atomic>
 #include <chrono>
@@ -67,11 +74,14 @@ private:
     static constexpr size_t largest_request = 2u << 20;
     std::shared_ptr<safe::event_t<bool>> shutdown_;
     DeviceModes modes_;
+    DeviceProfiles profiles_;
     std::atomic_bool report_listening_{false};
     std::atomic_bool relisten_{false};
     std::atomic_bool client_local_{true};
     std::atomic<std::chrono::steady_clock::rep> report_until_{0};
     std::string handle_locked(const std::string &line, Caller caller);
+    void migrate_profiles();
+    bool profiles_migrated_ = false;
     std::mutex mutex_;
     // Each session's video bytes at the caller's last STREAMS, by client certificate: the rate is the difference.
     struct SentSample {
