@@ -664,7 +664,8 @@ void Host::do_pin(const Job &job)
             ++state_.paired_serial;
         }
         read_files();
-        finish("Paired with " + (job.c.empty() ? job.a : job.c), true);
+        // Its profiles are chosen on the web page only, for now: until then the console asks who uses each controller.
+        finish("Paired with " + (job.c.empty() ? job.a : job.c) + ". Choose its profiles on the web page.", true);
     }
     else
     {

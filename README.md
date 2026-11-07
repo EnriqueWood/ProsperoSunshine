@@ -75,7 +75,8 @@ on, and the device stays paired and can connect again.
 ## Streaming
 
 Start **"PS5 Screen"** in Moonlight to stream what the console shows, or pick a game to start it as well. The first time, the
-console asks **"Who's using this controller?"** inside the stream; answer it with your Moonlight controller.
+console asks **"Who's using this controller?"** inside the stream; answer it with your Moonlight controller. A device given
+its own profiles doesn't get the question ([Profiles per device](#profiles-per-device)).
 
 By default the host never closes a game, because that could lose unsaved progress. Quitting in Moonlight ends the stream, and
 the game keeps running on the console. If another game is open, in front or behind the settings app, picking a game fails
@@ -100,7 +101,7 @@ back, set `back_button_timeout = -1` in `sunshine.conf`; a value of 0 or more is
 
 **Several controllers on one device:** every controller on a Moonlight client is a player of its own. The host's first
 controller plays as the console's user, and for each further one the console asks "Who's using this controller?" once it
-is first used: a controller the client announces but never uses (Steam Input's virtual one next to the real one, the
+is first used (on a device with its own profiles, it joins as the next one instead): a controller the client announces but never uses (Steam Input's virtual one next to the real one, the
 on-screen controls) doesn't appear on the console at all. Two people on one PC need one
 Moonlight with both controllers connected, not two clients. Measured here with the test client (two pads on one device),
 and a contributor played with two controllers on one Moonlight client on 10.20.
@@ -116,7 +117,7 @@ is the host. To give PS and Create to everyone, turn on **PS for all players** i
 
 The host can serve a small web page, so a phone or PC in your network can do what the app does without leaving the game:
 see the host's status, version and firmware, enter the PIN of a pending pairing, end a device's stream, rename or remove
-paired devices, change the settings, read or download the end of `sunshine.log` and `host_diag.log`, get the same
+paired devices, choose the console profiles each device plays as, change the settings, read or download the end of `sunshine.log` and `host_diag.log`, get the same
 diagnostic report as the app's (ready to paste into an issue), and restart the host.
 It is off until you set a login, and nothing listens on its port before that.
 
@@ -142,6 +143,48 @@ It is off until you set a login, and nothing listens on its port before that.
 - Settings changed on the page apply when the host starts again. After **Save** the page offers to restart it, and until
   then a banner says the saved settings aren't applied yet. The Experimental switches stay in the app, where they are
   checked against the firmware.
+
+## Profiles per device
+
+Each paired device can be given the console profiles it plays as. Lend the console to a friend and they play on their own
+profile, with their own saves, and nobody at their place can load, overwrite or delete yours. The [web page](#web-page) asks
+right after pairing, and **Devices** changes it later; the app only says that it is set there.
+
+- **Only these profiles:** each controller of the device joins as the next listed profile, and the console doesn't ask
+  "Who's using this controller?". The host signs the profile in if needed, and the console shows "<profile> joined the
+  party". A controller beyond the device's profiles doesn't join, and the console says so. The device plays through
+  its controllers only, or its keyboard and mouse as a controller of their own when it has none
+  ([Keyboard and mouse as a controller](#keyboard-and-mouse-as-a-controller)); they never reach the console's shared
+  keyboard and mouse, which belong to no profile: the console would ask "Who's using this mouse?" and let anyone pick.
+- **Watching only:** with none ticked, Devices marks the device **Spectator**. It streams but doesn't play: the console
+  shows "<device> joined as a spectator", and its controllers, keyboard and mouse don't join. Give it a profile while it
+  streams and the console tells it at once; its next press joins as it, without reconnecting.
+- **Can choose freely** (marked Risky): as before, the console asks and any profile can be picked, yours too. Devices
+  paired before profiles start like this, so nothing changes until you choose. Overview warns about them; **Don't show
+  again** stops it for those devices, and Devices still marks them Risky. Tap a device's badge in **Devices** for why it
+  is risky and **I trust this device**: it then shows **Trusted**, the notice leaves it out, and its badge has **Stop
+  trusting**.
+
+**Switching profile:** a player on a device with more than one profile switches to its next free one with
+**Ctrl+Backspace** on a keyboard, or by holding **L1+L2+R1+R2** for two seconds on a controller. The console shows "<old>
+passed the controller to <new>", and that controller starts there next time. Once it has gone round all of them, or after
+a refused switch, it waits 20 seconds before it can switch again, so nobody fills the screen with notifications.
+
+**Changing a device's profiles while it streams:** the stream goes on. Profiles added are there at once, and the console
+says so: a spectator joins with its next press, a player can switch to them. A controller playing as a profile taken away
+leaves it, and the console says so: it only watches until a button joins it as another of the device's profiles, if one
+is free. The console takes four signed-in users at most, so the host
+signs out the profiles it signed in once their last controller leaves (not the one in front on the console), and when it
+stops.
+
+**Guests:** the host can't add a Quick Play guest yet; the web page shows it greyed out. Until it can, create guest
+profiles on the console, up to four ("Guest 1" to "Guest 4"), as the console takes four controllers at once, and give
+them to the devices you lend. A device with all four can play with four controllers and reaches no one else's profile.
+Unlike Quick Play, these profiles keep their saves, shared by everyone who plays on them; a friend who wants to keep their
+own gets a profile of their own.
+
+**Set a sign-in passcode on your own profile.** The console's own user switching stays outside the host: a device that
+has PS and Create (the host's, see [Streaming](#streaming)) can still reach it.
 
 ## Keyboard and mouse as a controller
 

@@ -716,7 +716,8 @@ void Screen::open_devices()
 {
     renaming_ = false;
     target_.clear();
-    open_sheet(Sheet::devices, "Paired devices", "Rename a device, or take its access away.", "");
+    // Which profiles a device plays as is set on the web page only, for now (src/control/device_profiles.hpp).
+    open_sheet(Sheet::devices, "Paired devices", "Rename a device, or take its access away. Its profiles are set on the web page.", "");
 }
 
 void Screen::open_streams()
