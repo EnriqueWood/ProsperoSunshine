@@ -112,12 +112,14 @@ ignored, also the "hold Select" PS, so a guest can't leave your game, open the c
 or broadcast your screen. The role belongs to the host's device, not to the first slot: when the host leaves, nobody else
 gets it, and the host's device takes it back when it reconnects. Once every controller is gone, the next device to connect
 is the host. To give PS and Create to everyone, turn on **PS for all players** in the app's Settings and restart the host.
+On a device with [profiles of its own](#profiles-per-device), once you choose the [console menus](#console-menus), the
+controller's profile decides instead of its role.
 
 ## Web page
 
 The host can serve a small web page, so a phone or PC in your network can do what the app does without leaving the game:
 see the host's status, version and firmware, enter the PIN of a pending pairing, end a device's stream, rename or remove
-paired devices, choose the console profiles each device plays as, change the settings, read or download the end of `sunshine.log` and `host_diag.log`, get the same
+paired devices, choose the console profiles each device plays as and which of them reach the console's menus, change the settings, read or download the end of `sunshine.log` and `host_diag.log`, get the same
 diagnostic report as the app's (ready to paste into an issue), and restart the host.
 It is off until you set a login, and nothing listens on its port before that.
 
@@ -183,8 +185,32 @@ them to the devices you lend. A device with all four can play with four controll
 Unlike Quick Play, these profiles keep their saves, shared by everyone who plays on them; a friend who wants to keep their
 own gets a profile of their own.
 
-**Set a sign-in passcode on your own profile.** The console's own user switching stays outside the host: a device that
-has PS and Create (the host's, see [Streaming](#streaming)) can still reach it.
+### Console menus
+
+**Devices → Console menus** chooses which profiles reach the console's own menus from Moonlight. Lend the console and a
+friend plays their game, but can't open Settings, update the system (which also ends the jailbreak) or sign in to PSN.
+On a device with profiles of its own:
+
+- A controller playing as a chosen profile has PS and Create, also F1 and F2 of the
+  [keyboard's controller](#keyboard-and-mouse-as-a-controller) and the PS of a held Select. A controller playing as another
+  profile has neither, even the host's. The device's own keyboard plays as the profile of its first controller, and for a
+  profile without the menus its two keys into them do nothing: Print Screen (the Create menu) and Pause (the control
+  center).
+- Only a device with at least one chosen profile gets **"PS5 Screen"** in its app list, and the host refuses to start it for
+  any other device, as a client can ask for an app by its id without seeing it. Any device can start a game from its list,
+  and leave it with Quit when **Quit closes the game** is on.
+- While no game is in front (the home screen after a game ends, an app of the console's, a media app or homebrew), the
+  controllers, keyboard and mouse of other profiles do nothing, and a press says why: "<profile> can't use the console's menus. Start a game
+  from Moonlight". They play again once a game is in front.
+
+Until you choose (the default), everything goes as before: the host's controller has PS and Create (every controller with
+**PS for all players**), and every device gets "PS5 Screen". Choosing no profile closes the menus to all of them. Devices
+that can choose freely keep the host's rule either way, as which profile the console seated their controllers in isn't
+known. A change counts within a second, also during a stream. Devices shows "(menus)" after a device's profiles that
+reach them.
+
+**Set a sign-in passcode on your own profile.** The console's own user switching stays outside the host: a controller
+that reaches the console's menus can still reach it.
 
 ## Keyboard and mouse as a controller
 
