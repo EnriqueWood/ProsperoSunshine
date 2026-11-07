@@ -142,10 +142,14 @@ async function refresh() {
     renderPairings(data.pairings);
     renderStreams(data.streams);
     lastDevices = data.devices;
+    lastMenus = data.menus ?? null;
     const trusted = data.trusted || [];
     renderRisk(data.devices, trusted, data.risk_ack || []);
-    // The names of the profiles a device plays as: asked for once, they show from the next refresh on.
-    if (!consoleUsers && data.devices.some((d) => d.profiles && !['free', 'none'].includes(d.profiles))) loadUsers().catch(() => {});
+    // The names of the profiles a device plays as, or the menus are for: asked for once, they show from the next refresh on.
+    if (!consoleUsers && (data.devices.some((d) => d.profiles && !['free', 'none'].includes(d.profiles)) || (lastMenus && lastMenus.length))) {
+      loadUsers().catch(() => {});
+    }
+    renderMenus(lastMenus);
     renderDevices(data.devices, data.streams, trusted);
   } catch (e) {
     failed(e);
@@ -411,7 +415,8 @@ function profilesOf(text, trusted = false) {
     return { text: line, badge: p.set ? 'Risky' : 'profiles not set', badgeClass: p.set ? 'risky' : 'unset', trusted: false,
       why: `${how} Choose its profiles to limit it, or trust it if it's yours.` };
   }
-  const names = p.users.map(userName);  // a stored guest does nothing yet (Quick Play is coming later)
+  // A stored guest does nothing yet (Quick Play is coming later). Profiles that reach the console's menus say so.
+  const names = p.users.map((id) => (lastMenus && lastMenus.includes(id) ? `${userName(id)} (menus)` : userName(id)));
   if (!names.length) return { text: 'none, it can watch but its controllers don\'t join', badge: 'Spectator', badgeClass: 'spectator',
     why: 'This device can only watch: its controllers don\'t join and its keyboard doesn\'t reach the console. Tick a profile in Profiles so it can play.' };
   return { text: names.join(', '), badge: null };
@@ -436,6 +441,16 @@ function profilesSummary(form) {
   }
 }
 
+// A console profile as a row to tick: its picture (a blank circle without one) and its name.
+function profileRow(u, checked) {
+  const input = el('input', { type: 'checkbox', value: u.id });
+  input.dataset.label = u.name || `profile ${u.id}`;
+  input.checked = checked;
+  const picture = el('img', { class: 'avatar', src: `/api/users/${u.id}/picture`, alt: '', loading: 'lazy',
+    onerror: () => picture.replaceWith(el('span', { class: 'avatar blank', 'aria-hidden': 'true' })) });
+  return { input, row: el('label', {}, input, picture, el('span', { text: u.name || `profile ${u.id}` })) };
+}
+
 // Opens the profiles dialog for a device; after a pairing, "Decide later" leaves them unset.
 async function editProfiles(device, afterPairing = false) {
   let users;
@@ -458,9 +473,7 @@ async function editProfiles(device, afterPairing = false) {
     el('span', { class: 'muted', text: 'a one-time guest, no savegames are kept. Coming later: for now, create up to ' +
       'four guest profiles on the console, one per controller, and tick them below' })))];
   rows.push(...users.map((u) => {
-    const input = el('input', { type: 'checkbox', value: u.id });
-    input.dataset.label = u.name || `profile ${u.id}`;
-    input.checked = current.users.includes(u.id);
+    const { input, row } = profileRow(u, current.users.includes(u.id));
     // One step, not two: a profile picked while "Can choose freely" is on switches to "Only these profiles" with it ticked.
     input.addEventListener('click', () => {
       if (!form.querySelector('input[name="profiles-mode"][value="free"]').checked) return;
@@ -468,9 +481,7 @@ async function editProfiles(device, afterPairing = false) {
       form.querySelector('input[name="profiles-mode"][value="list"]').checked = true;
       profilesSummary(form);
     });
-    const picture = el('img', { class: 'avatar', src: `/api/users/${u.id}/picture`, alt: '', loading: 'lazy',
-      onerror: () => picture.replaceWith(blank()) });
-    return el('label', {}, input, picture, el('span', { text: u.name || `profile ${u.id}` }));
+    return row;
   }));
   $('profiles-list').replaceChildren(...rows);
   form.querySelector(`input[name="profiles-mode"][value="${current.free ? 'free' : 'list'}"]`).checked = true;
@@ -495,6 +506,79 @@ async function editProfiles(device, afterPairing = false) {
     refresh();
   } catch (e) { failed(e); }
 }
+
+// The console's menus: which profiles reach them from Moonlight (src/control/menu_access.hpp). null while not chosen: the
+// host's controller has PS and Create, as before. On a device with profiles of its own, a controller playing as another
+// profile has neither, and while no game is in front its buttons wait; that device gets "PS5 Screen" only with one of them.
+let lastMenus = null;
+
+function renderMenus(menus) {
+  const box = $('menus-state');
+  box.classList.toggle('risky', menus == null);
+  if (menus == null) {
+    box.textContent = 'Not chosen yet: as before, the host\'s controller has PS and Create whichever profile it plays as, '
+      + 'and every device gets "PS5 Screen".';
+  } else if (!menus.length) {
+    box.textContent = 'No profile: controllers of devices with profiles of their own have no PS or Create, and those devices '
+      + 'don\'t get "PS5 Screen".';
+  } else {
+    box.textContent = `PS, Create and "PS5 Screen" for ${menus.map(userName).join(', ')}. Every other profile only plays games.`;
+  }
+}
+
+function menusSummary(form) {
+  const unset = form.querySelector('input[name="menus-mode"][value="unset"]').checked;
+  const names = [...form.querySelectorAll('#menus-list input:checked')].map((i) => i.dataset.label);
+  $('menus-list').classList.toggle('off', unset);
+  const box = $('menus-summary');
+  box.classList.toggle('risky', unset);
+  if (unset) {
+    box.textContent = 'Whoever holds the host\'s controller reaches the console\'s menus, also a friend whose controller came first.';
+  } else if (!names.length) {
+    box.textContent = 'No controller of a device with profiles of its own reaches the console\'s menus. Devices that can '
+      + 'choose freely keep the host\'s rule.';
+  } else {
+    box.textContent = `Only ${names.join(', ')} reach the console's menus from a device with profiles of its own. Every `
+      + 'other profile plays games only.';
+  }
+}
+
+async function editMenus() {
+  let users;
+  try { users = await loadUsers(); } catch (e) { failed(e); return; }
+  const dialog = $('menus-dialog');
+  const form = $('menus-form');
+  const current = lastMenus;
+  $('menus-list').replaceChildren(...users.map((u) => {
+    const { input, row } = profileRow(u, !!current && current.includes(u.id));
+    // As in the profiles dialog: a profile ticked while "As before" is on switches to "Only these profiles" with it ticked.
+    input.addEventListener('click', () => {
+      if (!form.querySelector('input[name="menus-mode"][value="unset"]').checked) return;
+      input.checked = true;
+      form.querySelector('input[name="menus-mode"][value="list"]').checked = true;
+      menusSummary(form);
+    });
+    return row;
+  }));
+  form.querySelector(`input[name="menus-mode"][value="${current == null ? 'unset' : 'list'}"]`).checked = true;
+  menusSummary(form);
+  form.onchange = () => menusSummary(form);
+  dialog.returnValue = '';
+  const answer = await new Promise((resolve) => {
+    dialog.addEventListener('close', () => resolve(dialog.returnValue), { once: true });
+    dialog.showModal();
+  });
+  if (answer !== 'save') return;
+  const unset = form.querySelector('input[name="menus-mode"][value="unset"]').checked;
+  const ticked = [...form.querySelectorAll('#menus-list input:checked')].map((i) => i.value);
+  const profiles = unset ? 'unset' : ticked.length ? ticked.join(',') : 'none';
+  try {
+    await api('/api/menus', { profiles });
+    notice('Saved. It counts within a second, also for streams running now.');
+    refresh();
+  } catch (e) { failed(e); }
+}
+$('menus-edit').addEventListener('click', editMenus);
 
 // Ending a stream lets the device connect again right away; unpairing as well keeps it out until it pairs with a PIN.
 // One dialog with three answers: 'unpair', 'end', or null for Cancel (also Esc).

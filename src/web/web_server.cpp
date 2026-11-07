@@ -563,13 +563,22 @@ void routes(Server &server, State &state, ControlServer &control, const std::sha
             const auto it = profiles.find(d.value("uuid", ""));
             d["profiles"] = it == profiles.end() ? json(nullptr) : json(it->second);
         }
+        // The profiles that reach the console's menus: null while they aren't chosen, else their ids (none: empty).
+        json menus = nullptr;
+        if (const std::string answer = control.handle("MENUS", Caller::web); answer.starts_with("OK ") && answer != "OK unset") {
+            menus = json::array();
+            std::istringstream ids(answer.substr(3));
+            for (std::string id; std::getline(ids, id, ',');)
+                if (id != "none" && word(id, 8)) menus.push_back(id);
+        }
         send_json(response, json{{"host", host},
                                  {"status", status_lines.empty() ? json::object() : json(status(status_lines.front()))},
                                  {"pairings", records(ok_lines(control.handle("PAIRINGS", Caller::web)), pairing)},
                                  {"devices", devices},
                                  {"trusted", uuid_list("web_trusted.txt")},
                                  {"risk_ack", uuid_list("web_risk_ack.txt")},
-                                 {"streams", records(ok_lines(control.handle("STREAMS", Caller::web)), stream_record)}});
+                                 {"menus", menus},
+                                 {"streams",records(ok_lines(control.handle("STREAMS", Caller::web)), stream_record)}});
     });
     // The console's profiles, for choosing which ones a device may play as. Names are shown only here, signed in.
     get("^/api/users$", [&control](const Response &response, const Request &) {
@@ -615,6 +624,16 @@ void routes(Server &server, State &state, ControlServer &control, const std::sha
                            });
         if (!word(uuid, 64) || !plain) return send_error(response, SimpleWeb::StatusCode::client_error_bad_request, "check the profiles");
         send_answer(response, control.handle("SETPROFILES " + uuid + " " + profiles, ControlServer::Caller::web));
+    });
+    // {"profiles": "unset" | "none" | ids separated by commas}: which profiles reach the console's menus from Moonlight.
+    post("^/api/menus$", [&control](const Response &response, const json &body) {
+        const std::string profiles = text_field(body, "profiles");
+        const bool plain = !profiles.empty() && profiles.size() <= 200 &&
+                           std::all_of(profiles.begin(), profiles.end(), [](char c) {
+                               return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9') || c == ',';
+                           });
+        if (!plain) return send_error(response, SimpleWeb::StatusCode::client_error_bad_request, "check the profiles");
+        send_answer(response, control.handle("SETMENUS " + profiles, ControlServer::Caller::web));
     });
     post("^/api/pin$", [&control](const Response &response, const json &body) {
         const std::string id = text_field(body, "id"), pin = text_field(body, "pin"), name = text_field(body, "name");

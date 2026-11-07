@@ -114,6 +114,7 @@ input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accen
 .profiles-list label.later { opacity: .55; cursor: default; }
 .summary { margin: .5rem 0 0; padding: .5rem .75rem; border-radius: 8px; background: var(--bg); }
 .summary.risky { border-left: 4px solid var(--danger); }
+.summary + .row { margin-top: .75rem; }
 .badge.risky { color: var(--danger); border-color: var(--danger); font-weight: 600; }
 .badge.unset { color: var(--warn); border-color: var(--warn); }
 .badge.trusted { color: var(--ok); border-color: var(--ok); font-weight: 600; }

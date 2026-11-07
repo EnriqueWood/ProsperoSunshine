@@ -81,6 +81,12 @@
         <p id="devices-risk" class="risk-note" hidden></p>
         <ul id="devices" class="list"></ul>
       </div>
+      <div class="card">
+        <h2>Console menus</h2>
+        <p class="muted">Which profiles reach the console's own menus from Moonlight: PS and Create, "PS5 Screen", and the home screen once a game ends. Lend the console and a friend plays their game, without opening Settings, updating the system or signing in to PSN.</p>
+        <p id="menus-state" class="summary"></p>
+        <div class="row"><button id="menus-edit">Choose profiles</button></div>
+      </div>
     </section>
 
     <section id="tab-settings" class="tab" hidden>
@@ -134,6 +140,33 @@
       <p id="profiles-summary" class="summary" role="status"></p>
       <div class="dialog-buttons">
         <button value="later" id="profiles-later">Decide later</button>
+        <button value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="menus-dialog" class="dialog wide" aria-labelledby="menus-title" aria-describedby="menus-text">
+    <form method="dialog" id="menus-form">
+      <h2 id="menus-title">Console menus</h2>
+      <p id="menus-text">Which profiles reach the console's menus from Moonlight? This counts for devices with profiles of their own; one that can choose freely keeps the host's rule (see "As before").</p>
+      <label class="choice">
+        <input type="radio" name="menus-mode" value="list" checked>
+        <span>
+          <strong>Only these profiles</strong>
+          <span class="muted">A controller playing as a ticked profile has PS and Create (F1 and F2 on a keyboard, a held Select on a phone), and a device with a ticked profile gets "PS5 Screen". A controller playing as another profile only plays: it has no PS or Create, and while no game is in front its buttons do nothing.</span>
+        </span>
+      </label>
+      <div id="menus-list" class="profiles-list"></div>
+      <label class="choice">
+        <input type="radio" name="menus-mode" value="unset">
+        <span>
+          <span class="choice-head"><strong>As before</strong> <span class="badge risky">Risky</span></span>
+          <span class="muted">The host's controller has PS and Create whichever profile it plays as (every controller with PS for all players), and every device gets "PS5 Screen".</span>
+        </span>
+      </label>
+      <p id="menus-summary" class="summary" role="status"></p>
+      <div class="dialog-buttons">
+        <button value="cancel">Cancel</button>
         <button value="save" class="primary">Save</button>
       </div>
     </form>
