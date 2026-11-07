@@ -2,6 +2,7 @@
 #include "control/control_server.hpp"
 #include "control/autoload_host.hpp"
 #include "control/file_bridge.hpp"
+#include "control/menu_access.hpp"
 #include "control/stream_list.hpp"
 #include "control/http_guard.hpp"
 #include "host_control.hpp"
@@ -296,6 +297,35 @@ std::string ControlServer::handle_locked(const std::string &line, Caller caller)
                             : set->users.empty() ? "guest only"s
                                                  : std::to_string(set->users.size()) + " profile(s)" + (set->guest ? " and guest" : ""))
                         << ')';
+        return "OK saved";
+    }
+    if (command == "MENUS") {
+        const auto menus = read_menu_profiles(platf::appdata() / "menu_profiles.txt");
+        return "OK " + (menus ? format_menu_profiles(*menus) : "unset"s);
+    }
+    if (command == "SETMENUS") {
+        std::string text, extra;
+        in >> text;
+        if (text.empty() || (in >> extra)) return "ERR usage: SETMENUS <profiles|unset>";
+        std::optional<MenuProfiles> menus;
+        if (text != "unset") {
+            menus = parse_menu_profiles(text);
+            if (!menus) return "ERR the profiles are not valid";
+        }
+        if (menus && !menus->users.empty()) {
+            ps_console_user users[max_profiles];
+            const int count = ps_console_users(users, static_cast<int>(max_profiles));
+            if (count < 0) return "ERR the console's profiles can't be read";
+            for (const uint32_t id : menus->users) {
+                if (std::none_of(users, users + count, [id](const ps_console_user &u) { return u.id == id; }))
+                    return "ERR no profile " + format_user_id(id) + " on this console";
+            }
+        }
+        if (!write_menu_profiles(platf::appdata() / "menu_profiles.txt", menus)) return "ERR menu_profiles.txt could not be written";
+        // No ids or names in the log: it goes into the report people post.
+        BOOST_LOG(info) << "Control: the console's menus "sv
+                        << (!menus ? "are no longer chosen, the host's role decides PS and Create"s
+                                   : "are for " + std::to_string(menus->users.size()) + " profile(s)");
         return "OK saved";
     }
     if (command == "REPORT") {

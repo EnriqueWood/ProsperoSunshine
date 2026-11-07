@@ -22,7 +22,11 @@
 //                                  (device_profiles.hpp: free, none, or ids and "guest" separated by commas)
 //   SETPROFILES <uuid> <profiles|unset> -> sets which profiles a paired device may play as; "unset" takes the setting
 //                                  away ("OK saved" / "ERR ..."). Every id must be a profile on the console.
-//   REPORT                      -> "OK port=<n>": for some seconds, <appdata>/diagnostics.txt is on that port
+//   MENUS                       -> "OK <profiles|unset>": the profiles that reach the console's menus (menu_access.hpp:
+//                                  none, or ids separated by commas), "unset" while they aren't chosen
+//   SETMENUS <profiles|unset>   -> chooses them ("OK saved" / "ERR ..."); "unset" goes back to the host's role deciding.
+//                                  Every id must be a profile on the console. The host reads them within a second.
+//   REPORT                     -> "OK port=<n>": for some seconds, <appdata>/diagnostics.txt is on that port
 //   AUTOLOAD [ON|OFF]           -> the Payload Manager's autoload list, for the app (autoload_host.hpp)
 //   WEBLOGIN                    -> "OK user=<name> enabled=<0|1>": the stored login, also while the page is off; the
 //                                  name is empty without one (enabled=0 then). The page serves while enabled=1.
