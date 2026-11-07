@@ -14,4 +14,8 @@ namespace platf {
 // it is told at once.
 void profiles_changed(const std::string &cert, const std::vector<uint32_t> &added);
 
+// Whether the paired device with this certificate gets "PS5 Screen" (control/menu_access.hpp): yes while the console's
+// menus aren't chosen, for a device that can choose freely or isn't set, and for one with a profile that reaches the menus.
+bool screen_offered_to(const std::string &cert);
+
 }  // namespace platf

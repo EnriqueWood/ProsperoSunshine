@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Sunshine's platf:: layer for the PS5: networking, game audio from Avcap2, the native virtual pad, keyboard
 // and mouse, and placeholders for what is not forwarded (touch screen, pen).
+#include "apps/titles.hpp"
 #include "audio/channel_map.hpp"
 #include "input/gamepad_map.hpp"
 #include "input/keyboard_map.hpp"
@@ -10,7 +11,10 @@
 #include "platform/ps5/pad.h"
 #include "platform/ps5/profile_seat.h"
 #include "platform/ps5/shared_capture.hpp"
+#include "platform/ps5/title_launch.h"
 #include "control/device_profiles.hpp"
+#include "control/menu_access.hpp"
+#include "sunshine/platform_ps5.hpp"
 #include "src/nvhttp.h"
 #include "src/config.h"
 #include "src/file_handler.h"
@@ -575,6 +579,13 @@ struct input_raw_t {
     // The profiles this host signed in: it signs each out again once none of its pads sits in it (release_profile), so
     // the console's four sessions don't fill up with players who left.
     std::vector<uint32_t> host_signed_in;
+    // The console's menus (control/menu_access.hpp): what decides each pad's PS and Create, looked up at most once a second
+    // and anew when it opens or switches profile; whether its input waits, as no game is in front and its profile doesn't
+    // reach the menus; and when its player was last told so.
+    std::array<prospero::MenuAccess, MAX_GAMEPADS> menu_access{};
+    std::array<std::chrono::steady_clock::time_point, MAX_GAMEPADS> menu_checked{}, held_told{};
+    std::array<bool, MAX_GAMEPADS> held_back{};
+    bool game_in_front = true;  // refreshed every half second by poll_pad_output
     bool ps_all_players = false;  // ps_button_all_players: every pad may press PS and Create, not only the host's
     prospero::PadRoles<MAX_GAMEPADS> roles;  // who is the host: a paired device, not a slot (GitHub issue 15)
     std::jthread output_thread;
@@ -612,14 +623,39 @@ static void set_triggers(input_raw_t &input, int nr, const prospero::TriggerBloc
 
 static void check_seat_switches(input_raw_t &input);
 
+// Whether a game is in front, for pads whose profile doesn't reach the console's menus (control/menu_access.hpp): the
+// console's running big app is a title the app list shows as a game (titles.cpp). The home screen, an app of the
+// console's, a media app or homebrew such as the settings app or a store count as menus. The running big app is
+// sceLncUtilGetAppIdOfRunningBigApp's, the one the keyboard pad's profile goes by (patch 0018). A title's kind is read
+// once, when it comes to the front.
+static bool game_in_front() {
+    static std::mutex mutex;
+    static std::string title;
+    static bool game = false;
+    char running[16];
+    if (ps_title_running(running) <= 0) return false;
+    std::lock_guard lock(mutex);
+    if (title != running) {
+        title = running;
+        const auto meta = prospero::read_title_meta("/user", title);
+        game = meta && meta->game;
+    }
+    return game;
+}
+
 // Reads what the system wants from each pad at the cadence of Remote Play's own reader and passes on
 // changes of the motors, the light bar and the trigger effects. Only titles using the classic two-motor rumble set the motors;
-// see docs/re/pad-output.md.
+// see docs/re/pad-output.md. Every half second, while pads are open, it also looks whether a game is in front.
 static void poll_pad_output(std::stop_token stop, input_raw_t *input) {
     std::array<bool, MAX_GAMEPADS> failed{};
-    while (!stop.stop_requested()) {
+    bool any_pad = false;
+    for (unsigned tick = 0; !stop.stop_requested(); ++tick) {
+        std::optional<bool> front;
+        if (any_pad && tick % 50 == 0) front = game_in_front();
         {
             std::lock_guard lock(input->mutex);
+            if (front) input->game_in_front = *front;
+            any_pad = std::any_of(input->pads.begin(), input->pads.end(), [](const ps_pad *pad) { return pad != nullptr; });
             check_seat_switches(*input);
             for (int nr = 0; nr < MAX_GAMEPADS; ++nr) {
                 if (!input->pads[nr]) {
@@ -720,6 +756,11 @@ input_t input() {
     raw->ps_all_players = all != settings.end() && all->second == "1";
     BOOST_LOG(info) << (raw->ps_all_players ? "PS5 input: every player can press PS and Create"sv
                                             : "PS5 input: only the host can press PS and Create"sv);
+    // No profile names or ids: this log goes into the report people post.
+    if (const auto menus = prospero::read_menu_profiles(appdata() / "menu_profiles.txt"))
+        BOOST_LOG(info) << "PS5 input: the console's menus are for "sv << menus->users.size()
+                        << " profile(s); on a device with profiles of its own, that decides PS and Create"sv;
+    raw->game_in_front = game_in_front();
     raw->output_thread = std::jthread(poll_pad_output, raw);
     {
         std::lock_guard live(live_input_mutex);
@@ -859,6 +900,8 @@ enum class pad_open { opened, watching, failed };
 static pad_open open_pad(input_raw_t &input, int nr, bool host) {
     auto *&pad = input.pads[nr];
     input.seat[nr] = 0;
+    input.menu_checked[nr] = {};  // its menus go by the profile it gets
+    input.held_back[nr] = false;
     const auto device = paired_device(input.owner[nr]);
     const auto plan = seat_plan(input, nr, device.uuid);
     const std::string who = device.name.empty() ? "This device"s : device.name;
@@ -1003,6 +1046,8 @@ static bool switch_seat(input_raw_t &input, int nr, std::size_t &round) {
         }
     }
     input.seat[nr] = seated;
+    input.menu_checked[nr] = {};  // the new profile may reach the console's menus, or not
+    input.held_back[nr] = false;
     request_motion(input, nr);
     if (seated != next) return false;
     seats().remember(device.uuid, input.client_index[nr], next);
@@ -1060,7 +1105,8 @@ void profiles_changed(const std::string &cert, const std::vector<uint32_t> &adde
         input.colors[nr] = {};
         input.triggers[nr] = {};
         input.touch[nr].clear();
-        input.back[nr] = input.ps_held[nr] = false;
+        input.back[nr] = input.ps_held[nr] = input.held_back[nr] = false;
+        input.menu_checked[nr] = {};
         input.switch_since[nr] = {};
         input.switch_done[nr] = false;
         input.waiting[nr] = input.spectating[nr] = true;
@@ -1160,9 +1206,61 @@ void free_gamepad(input_t &input, int nr) {
     input->touch[nr].clear();
     input->back[nr] = false;
     input->ps_held[nr] = false;
+    input->held_back[nr] = false;
+    input->menu_checked[nr] = {};
     BOOST_LOG(info) << "PS5 virtual pad "sv << nr << " detached ("sv << rc << ')'
                     << (was_host ? (input->roles.host_away() ? ", the host's device keeps the role"sv : ", the host role is free"sv) : ""sv);
     release_profile(*input, seated);
+}
+
+namespace {
+std::optional<prospero::MenuProfiles> menu_profiles() { return prospero::read_menu_profiles(platf::appdata() / "menu_profiles.txt"); }
+}  // namespace
+
+// Whether a paired device gets "PS5 Screen" (control/menu_access.hpp).
+bool screen_offered_to(const std::string &cert) {
+    const auto menus = menu_profiles();
+    return !menus || prospero::screen_offered(menus, profiles_of(paired_device(cert).uuid));
+}
+
+// What decides a pad's PS and Create (control/menu_access.hpp): the profiles the owner gave the console's menus and the
+// profile the host seated it in. Looked up at most once a second, so a change on the web page counts within a second.
+// Caller holds input.mutex.
+static prospero::MenuAccess pad_menu_access(input_raw_t &input, int nr) {
+    const auto now = std::chrono::steady_clock::now();
+    if (input.menu_checked[nr].time_since_epoch().count() != 0 && now - input.menu_checked[nr] < 1s) return input.menu_access[nr];
+    input.menu_checked[nr] = now;
+    const auto menus = menu_profiles();
+    // While the menus aren't chosen, the device's profiles don't matter.
+    input.menu_access[nr] = menus ? prospero::menu_access(menus, profiles_of(paired_device(input.owner[nr]).uuid), input.seat[nr])
+                                  : prospero::MenuAccess::by_role;
+    return input.menu_access[nr];
+}
+
+// A pad's virtual controller for its buttons, sticks, touchpad and motion: every use goes through here. Null while the pad
+// has none, or while its input waits: no game is in front and its profile doesn't reach the console's menus (the one rule,
+// prospero::passes_input). Caller holds input.mutex.
+static ps_pad *pad_for_input(input_raw_t &input, int nr) {
+    if (!input.pads[nr] || !prospero::passes_input(pad_menu_access(input, nr), input.game_in_front)) return nullptr;
+    return input.pads[nr];
+}
+
+// A pad whose input waits (pad_for_input). Once it starts waiting it lets go of everything, as a button held while the game
+// ended would stay down on the home screen. A press tells its player why, at most once every switch_cooldown. Caller holds
+// input.mutex.
+static void hold_back(input_raw_t &input, int nr, const gamepad_state_t &state) {
+    if (!input.held_back[nr]) {
+        input.held_back[nr] = true;
+        input.back[nr] = input.ps_held[nr] = false;
+        input.touch[nr].clear();
+        ps_pad_neutral(input.pads[nr]);
+        BOOST_LOG(info) << "PS5 virtual pad "sv << nr << ": no game in front, and its profile doesn't reach the console's menus: its input waits"sv;
+    }
+    if (!prospero::wakes_pad(state.buttonFlags, state.lt, state.rt, state.lsX, state.lsY, state.rsX, state.rsY)) return;
+    if (const auto now = std::chrono::steady_clock::now(); now - input.held_told[nr] >= prospero::switch_cooldown) {
+        input.held_told[nr] = now;
+        ps_notify((profile_name(input.seat[nr]) + " can't use the console's menus. Start a game from Moonlight").c_str());
+    }
 }
 
 void gamepad_update(input_t &input, int nr, const gamepad_state_t &state) {
@@ -1201,18 +1299,25 @@ void gamepad_update(input_t &input, int nr, const gamepad_state_t &state) {
         const auto now = std::chrono::steady_clock::now();
         input->switch_since[nr] = prospero::switch_at_once(state.buttonFlags) ? now - prospero::switch_hold : now;
     }
+    ps_pad *pad = pad_for_input(*input, nr);
+    if (!pad) return hold_back(*input, nr, state);
+    if (std::exchange(input->held_back[nr], false))
+        BOOST_LOG(info) << "PS5 virtual pad "sv << nr << ": a game is in front, its input goes through again"sv;
+    const auto access = pad_menu_access(*input, nr);
     const auto send = [&](uint32_t flags) {
         const auto mapped = prospero::map_gamepad(flags, state.lt, state.rt, state.lsX, state.lsY, state.rsX, state.rsY);
-        const ps_pad_state pad{mapped.buttons, mapped.lx, mapped.ly, mapped.rx, mapped.ry, mapped.l2, mapped.r2};
-        ps_pad_send(input->pads[nr], &pad);
+        const ps_pad_state out{mapped.buttons, mapped.lx, mapped.ly, mapped.rx, mapped.ry, mapped.l2, mapped.r2};
+        ps_pad_send(pad, &out);
     };
     // Sunshine turns a held Select into PS (back_button_timeout), but Select is Create here and pressing it
     // first would open the Create menu. So Create only goes out, as a tap, when Select comes up early. The
     // margin keeps Sunshine's own forced release at the timeout from counting as early.
     const auto role = input->roles.is_host(nr) ? prospero::PadRole::host : prospero::PadRole::guest;
-    uint32_t flags = prospero::allowed_buttons(state.buttonFlags, role, input->ps_all_players);
+    uint32_t flags = prospero::allowed_buttons(state.buttonFlags, role, input->ps_all_players, access);
     if ((state.buttonFlags & ~flags) && !(input->ps_held[nr]))
-        BOOST_LOG(info) << "PS5 virtual pad "sv << nr << ": PS or Create ignored, only the host has them (ps_button_all_players)"sv;
+        BOOST_LOG(info) << "PS5 virtual pad "sv << nr << ": PS or Create ignored, "sv
+                        << (access == prospero::MenuAccess::denied ? "its profile doesn't reach the console's menus"sv
+                                                                   : "only the host has them (ps_button_all_players)"sv);
     input->ps_held[nr] = state.buttonFlags & ~flags;
     bool create_tap = false;
     if (const auto timeout = config::input.back_button_timeout; timeout >= 0ms) {
@@ -1248,26 +1353,30 @@ void gamepad_touch(input_t &input, const gamepad_touch_t &touch) {
         ps_pad_rest(input->pads[nr]);
         return;
     }
+    // The touchpad moves the pointer of some of the console's screens.
+    ps_pad *pad = pad_for_input(*input, nr);
+    if (!pad) return;
     if (!fingers.update(touch.eventType, touch.pointerId, touch.x, touch.y)) return;
     std::array<ps_pad_touch, 2> points{};
     for (int i = 0; i < fingers.count(); i++) {
         const auto &point = fingers.points()[i];
         points[i] = {point.id, point.x, point.y};
     }
-    ps_pad_set_touch(input->pads[nr], fingers.count(), points.data());
+    ps_pad_set_touch(pad, fingers.count(), points.data());
 }
 
 void gamepad_motion(input_t &input, const gamepad_motion_t &motion) {
     const int nr = motion.id.globalIndex;
     if (nr < 0 || nr >= MAX_GAMEPADS) return;
     std::lock_guard lock(input->mutex);
-    if (!input->pads[nr]) return;
+    ps_pad *pad = pad_for_input(*input, nr);
+    if (!pad) return;
     if (motion.motionType == prospero::moonlight::motion_accel) {
         const float xyz[3] = {prospero::accel_to_g(motion.x), prospero::accel_to_g(motion.y), prospero::accel_to_g(motion.z)};
-        ps_pad_set_acceleration(input->pads[nr], xyz);
+        ps_pad_set_acceleration(pad, xyz);
     } else if (motion.motionType == prospero::moonlight::motion_gyro) {
         const float xyz[3] = {prospero::gyro_to_rad(motion.x), prospero::gyro_to_rad(motion.y), prospero::gyro_to_rad(motion.z)};
-        ps_pad_set_angular_velocity(input->pads[nr], xyz);
+        ps_pad_set_angular_velocity(pad, xyz);
     }
 }
 
@@ -1327,33 +1436,54 @@ void set_input_owner(const feedback_queue_t *feedback_queue) { input_owner = fee
 //   controller of their own (keyboard_pad, which takes them before they get here).
 // - Input without its device gets none: Sunshine's key repeat (repeat_key, on its task pool) and its nudge of the
 //   pointer at a stream's start come that way, as could any other path. A repeat of a key that is held changes nothing.
+// - The console's menus (control/menu_access.hpp), for a device's own ones whose profile doesn't reach them: a key that
+//   opens them (`vk`, opens_console_menu: Print Screen the Create menu, Pause the control center) gets none, and while no
+//   game is in front nothing does. They go then, which lets go of everything, and come back seated with the next use once
+//   a game is in front; a press meanwhile tells the player why, as for a pad (hold_back).
 // A release gets the shared ones (nothing stays held there); a device's own ones release everything when they go.
-// Its profiles are read at most once a second. Caller holds input.mutex.
-static kbm_t *kbm_for_input(input_raw_t &input, bool release) {
+// Its profiles and the menus are read at most once a second. Caller holds input.mutex.
+static kbm_t *kbm_for_input(input_raw_t &input, bool release, uint16_t vk = 0) {
     const std::string cert = input_owner && *input_owner ? gamepad_owner(*input_owner) : std::string();
     if (cert.empty()) return release ? &input.shared : nullptr;
     thread_local std::string cached_cert;
-    thread_local bool cached_limited = false;
+    thread_local std::optional<prospero::ProfileSet> cached_set;
+    thread_local std::optional<prospero::MenuProfiles> cached_menus;
     const auto now = std::chrono::steady_clock::now();
     thread_local std::chrono::steady_clock::time_point cached_at{};
     if (cert != cached_cert || now - cached_at > 1s) {
-        const auto set = profiles_of(paired_device(cert).uuid);
-        cached_limited = set && !set->free;
+        cached_set = profiles_of(paired_device(cert).uuid);
+        cached_menus = menu_profiles();
         cached_cert = cert;
         cached_at = now;
     }
-    if (!cached_limited) return &input.shared;
+    if (!cached_set || cached_set->free) return &input.shared;
     uint32_t user = 0;
+    int first = -1;  // the device's first seated pad
     for (int nr = 0; nr < MAX_GAMEPADS && !user; ++nr)
-        if (input.pads[nr] && input.owner[nr] == cert) user = input.seat[nr];
+        if (input.pads[nr] && input.owner[nr] == cert && input.seat[nr]) user = input.seat[first = nr];
+    const auto access = prospero::menu_access(cached_menus, cached_set, user);
+    const bool waits = !prospero::passes_input(access, input.game_in_front);
     auto it = std::find_if(input.own.begin(), input.own.end(), [&](const auto &kbm) { return kbm->owner == cert; });
-    // Its player switched profile, or it lost the one they were in: the next use adds them anew where it plays now.
-    if (it != input.own.end() && (*it)->user != user) {
+    // Its player switched profile, or it lost the one they were in, or it waits for a game: the next use adds them anew
+    // where it plays then.
+    if (it != input.own.end() && ((*it)->user != user || waits)) {
+        if (waits) BOOST_LOG(info) << "PS5 input: no game in front, and the profile of a device's own keyboard and mouse doesn't reach the console's menus: they wait"sv;
         close_kbm(**it);
         input.own.erase(it);
         it = input.own.end();
     }
     if (!user) return nullptr;
+    if (waits) {
+        if (!release && first >= 0 && now - input.held_told[first] >= prospero::switch_cooldown) {
+            input.held_told[first] = now;
+            ps_notify((profile_name(user) + " can't use the console's menus. Start a game from Moonlight").c_str());
+        }
+        return nullptr;
+    }
+    if (!release && access == prospero::MenuAccess::denied && prospero::opens_console_menu(prospero::vk_usage(vk))) {
+        BOOST_LOG(info) << "PS5 input: Print Screen or Pause ignored, the keyboard's profile doesn't reach the console's menus"sv;
+        return nullptr;
+    }
     if (it == input.own.end()) {
         input.own.push_back(std::make_unique<kbm_t>());
         input.own.back()->owner = cert;
@@ -1494,7 +1624,7 @@ void hscroll(input_t &input, int distance) {
 
 void keyboard_update(input_t &input, uint16_t modcode, bool release, uint8_t, bool) {
     std::lock_guard lock(input->mutex);
-    kbm_t *kbm = kbm_for_input(*input, release);
+    kbm_t *kbm = kbm_for_input(*input, release, modcode);
     if (!kbm) return;
     // Only a key that changes what is held asks for the keyboard (an unmapped key or a repeat adds none).
     auto keys = kbm->keys;

@@ -6,6 +6,7 @@
 #include "apps/quit_policy.hpp"
 #include "apps/titles.hpp"
 #include "platform/ps5/title_launch.h"
+#include "sunshine/platform_ps5.hpp"
 #include "src/config.h"
 #include "src/logging.h"
 #include "src/process.h"
@@ -312,6 +313,18 @@ void close_game_on_quit() {
     }
     BOOST_LOG(info) << "Closed "sv << game << " in "sv
                     << duration_cast<milliseconds>(std::chrono::steady_clock::now() - start).count() << " ms"sv;
+}
+
+// "PS5 Screen" streams the home screen, where the D-pad reaches Settings without a PS button, so a device none of whose
+// profiles reaches the console's menus neither gets it in its list nor may start it (control/menu_access.hpp, patch 0023).
+bool app_listed(const ctx_t &app, const std::string &client_cert) {
+    return app.id != std::to_string(screen_app_id) || platf::screen_offered_to(client_cert);
+}
+
+std::string launch_refused(int app_id, const std::string &client_cert) {
+    if (app_id != screen_app_id || platf::screen_offered_to(client_cert)) return {};
+    BOOST_LOG(info) << "PS5 Screen refused: none of the device's profiles reaches the console's menus"sv;
+    return "PS5 Screen isn't available to this device: none of its profiles reaches the console's menus. Pick a game.";
 }
 
 const std::vector<ctx_t> &proc_t::get_apps() const { return _apps; }

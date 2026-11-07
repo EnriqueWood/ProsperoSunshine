@@ -1,0 +1,69 @@
+ProsperoSunshine: "PS5 Screen" only for devices that may reach the console's menus
+
+The PS5 host lets the owner choose which console profiles reach the console's own menus from Moonlight. "PS5 Screen"
+streams the home screen, and from there the D-pad reaches Settings without a PS button. So a device whose profiles all
+lack the menus doesn't get it in its app list, and the host refuses to start it for that device, as a client can ask for
+an app by its id without seeing it. The PS5 process layer decides, through the new proc::app_listed and
+proc::launch_refused, by the client certificate the TLS verify callback accepted, as upstream's launch does.
+
+--- a/src/process.h
++++ b/src/process.h
+@@ -261,5 +261,25 @@
+    * @brief With close_game_on_quit, the app ID of the game a finished session left in front, else 0 (process_ps5.cpp).
+    */
+   int game_left_running();
++
++  /**
++   * @brief Whether a paired client gets an app in its list (process_ps5.cpp).
++   *
++   * "PS5 Screen" only goes to a device with a profile that may reach the console's menus.
++   *
++   * @param app The app.
++   * @param client_cert The client's certificate.
++   * @return True to list it.
++   */
++  bool app_listed(const ctx_t &app, const std::string &client_cert);
++
++  /**
++   * @brief Why a paired client may not start an app, or nothing when it may (process_ps5.cpp).
++   *
++   * @param app_id The app the client asks for.
++   * @param client_cert The client's certificate.
++   * @return The status message for the client, empty when the app may start.
++   */
++  std::string launch_refused(int app_id, const std::string &client_cert);
+ #endif
+ }  // namespace proc
+--- a/src/nvhttp.cpp
++++ b/src/nvhttp.cpp
+@@ -1407,6 +1407,11 @@
+     apps.put("<xmlattr>.status_code", 200);
+ 
+     for (auto &proc : proc::proc.get_apps()) {
++#ifdef __SCE__
++      if (!proc::app_listed(proc, last_verified_client_cert)) {
++        continue;
++      }
++#endif
+       pt::ptree app;
+ 
+       app.put("IsHdrSupported"s, video::active_hevc_mode >= 3 ? 1 : 0);
+@@ -1470,6 +1475,18 @@
+       return;
+     }
+ 
++#ifdef __SCE__
++    // A client can ask for an app by its id without seeing it in its list.
++    if (const auto refused = proc::launch_refused((int) appid, last_verified_client_cert); !refused.empty()) {
++      tree.put("root.resume", 0);
++      tree.put("root.<xmlattr>.status_code", 403);
++      tree.put("root.<xmlattr>.status_message", refused);
++      tree.put("root.gamesession", 0);
++
++      return;
++    }
++#endif
++
+     host_audio = util::from_view(get_arg(args, "localAudioPlayMode"));
+     auto launch_session = make_launch_session(host_audio, args);
+     remember_launch_client(*launch_session, net::addr_to_normalized_string(request->remote_endpoint().address()));
