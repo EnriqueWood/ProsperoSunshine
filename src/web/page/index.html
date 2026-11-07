@@ -41,6 +41,14 @@
     </header>
 
     <p id="notice" class="notice" role="status" title="Tap to close" hidden></p>
+    <div id="risk" class="pending risk" role="status" hidden>
+      <span id="risk-text"></span>
+      <span class="risk-actions">
+        <button id="risk-review" class="primary">Review in Devices</button>
+        <button id="risk-dismiss">Dismiss</button>
+        <button id="risk-never" class="ghost">Don't show again</button>
+      </span>
+    </div>
     <div id="pending" class="pending" role="status" hidden>
       <span>Saved settings aren't applied yet: the host reads them when it starts.</span>
       <button id="pending-restart" class="primary">Restart host</button>
@@ -70,6 +78,7 @@
     <section id="tab-devices" class="tab" hidden>
       <div class="card">
         <h2>Paired devices</h2>
+        <p id="devices-risk" class="risk-note" hidden></p>
         <ul id="devices" class="list"></ul>
       </div>
     </section>
@@ -102,6 +111,33 @@
       </div>
     </section>
   </div>
+
+  <dialog id="profiles-dialog" class="dialog wide" aria-labelledby="profiles-title" aria-describedby="profiles-text">
+    <form method="dialog" id="profiles-form">
+      <h2 id="profiles-title">Profiles</h2>
+      <p id="profiles-text"></p>
+      <label class="choice">
+        <input type="radio" name="profiles-mode" value="list" checked>
+        <span>
+          <strong>Only these profiles</strong>
+          <span class="muted">Each controller of this device joins as the next ticked profile, without the console asking who uses it. A player switches to the next one with Ctrl+Backspace on a keyboard, or by holding L1+L2+R1+R2 for two seconds on a controller; once it has gone round all of them, it waits 20 seconds before switching again. That controller starts there next time. With none ticked the device can watch, but its controllers don't join.</span>
+        </span>
+      </label>
+      <div id="profiles-list" class="profiles-list"></div>
+      <label class="choice">
+        <input type="radio" name="profiles-mode" value="free">
+        <span>
+          <span class="choice-head"><strong>Can choose freely</strong> <span class="badge risky">Risky</span></span>
+          <span class="muted">The console asks "Who's using this controller?" and this device can pick any profile on the console, with its games, saves and trophies.</span>
+        </span>
+      </label>
+      <p id="profiles-summary" class="summary" role="status"></p>
+      <div class="dialog-buttons">
+        <button value="later" id="profiles-later">Decide later</button>
+        <button value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="end-dialog" class="dialog" aria-labelledby="end-title" aria-describedby="end-text">
     <form method="dialog">

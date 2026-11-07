@@ -15,6 +15,9 @@
 #include <Simple-Web-Server/server_https.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
+#include <cctype>
+#include <map>
+#include <vector>
 #include <atomic>
 #include <functional>
 #include <optional>
@@ -167,7 +170,7 @@ std::string token_of(const Request &request) {
 void send(const Response &response, SimpleWeb::StatusCode code, std::string_view body, const char *type,
           SimpleWeb::CaseInsensitiveMultimap headers = {}) {
     headers.emplace("Content-Type", type);
-    headers.emplace("Cache-Control", "no-store");
+    if (headers.find("Cache-Control") == headers.end()) headers.emplace("Cache-Control", "no-store");
     headers.emplace("X-Content-Type-Options", "nosniff");
     headers.emplace("X-Frame-Options", "DENY");
     headers.emplace("Referrer-Policy", "no-referrer");
@@ -318,6 +321,43 @@ bool word(std::string_view text, size_t limit) {
 bool name_ok(std::string_view text) {
     return !text.empty() && text.size() <= 64 &&
            std::all_of(text.begin(), text.end(), [](char c) { return static_cast<unsigned char>(c) >= 0x20 && c != 0x7f; });
+}
+
+// Device lists the web page keeps in appdata, one uuid a line: web_trusted.txt, the devices the operator trusts to play as
+// any profile (Devices shows them as Trusted, and the risky setup notice leaves them out), and web_risk_ack.txt, the risky
+// devices the notice no longer names ("Don't show again"; Devices still marks them Risky).
+std::vector<std::string> uuid_list(const char *name) {
+    std::vector<std::string> uuids;
+    std::istringstream in(read_file(platf::appdata() / name));
+    for (std::string line; std::getline(in, line);)
+        if (word(line, 64)) uuids.push_back(line);
+    return uuids;
+}
+
+// Adds {"uuids": [...]} to one of those lists, or takes them out; false with the error sent.
+bool change_uuid_list(const Response &response, const json &body, const char *name, bool add) {
+    const auto uuids = body.find("uuids");
+    if (uuids == body.end() || !uuids->is_array() || uuids->empty() || uuids->size() > 64) {
+        send_error(response, SimpleWeb::StatusCode::client_error_bad_request, "no devices");
+        return false;
+    }
+    std::vector<std::string> list = uuid_list(name);
+    for (const auto &uuid : *uuids) {
+        if (!uuid.is_string() || !word(uuid.get<std::string>(), 64)) {
+            send_error(response, SimpleWeb::StatusCode::client_error_bad_request, "no devices");
+            return false;
+        }
+        const auto it = std::find(list.begin(), list.end(), uuid.get<std::string>());
+        if (add && it == list.end()) list.push_back(uuid.get<std::string>());
+        if (!add && it != list.end()) list.erase(it);
+    }
+    std::string text;
+    for (const auto &uuid : list) text += uuid + '\n';
+    if (!write_file(platf::appdata() / name, text)) {
+        send_error(response, SimpleWeb::StatusCode::server_error_internal_server_error, std::string(name) + " could not be written");
+        return false;
+    }
+    return true;
 }
 
 std::optional<json> body_of(const Request &request) {
@@ -512,11 +552,69 @@ void routes(Server &server, State &state, ControlServer &control, const std::sha
                   {"name", config::nvhttp.sunshine_name},
                   {"port", net::map_port(0)},
                   {"settings_pending", settings_pending()}};
+        // Each device with the profiles it may play as: null while they are not set.
+        std::map<std::string, std::string> profiles;
+        for (const auto &line : ok_lines(control.handle("PROFILES", Caller::web))) {
+            const auto record = device_profiles(line);
+            profiles[record.at("uuid")] = record.at("profiles");
+        }
+        json devices = records(ok_lines(control.handle("DEVICES", Caller::web)), device);
+        for (auto &d : devices) {
+            const auto it = profiles.find(d.value("uuid", ""));
+            d["profiles"] = it == profiles.end() ? json(nullptr) : json(it->second);
+        }
         send_json(response, json{{"host", host},
                                  {"status", status_lines.empty() ? json::object() : json(status(status_lines.front()))},
                                  {"pairings", records(ok_lines(control.handle("PAIRINGS", Caller::web)), pairing)},
-                                 {"devices", records(ok_lines(control.handle("DEVICES", Caller::web)), device)},
+                                 {"devices", devices},
+                                 {"trusted", uuid_list("web_trusted.txt")},
+                                 {"risk_ack", uuid_list("web_risk_ack.txt")},
                                  {"streams", records(ok_lines(control.handle("STREAMS", Caller::web)), stream_record)}});
+    });
+    // The console's profiles, for choosing which ones a device may play as. Names are shown only here, signed in.
+    get("^/api/users$", [&control](const Response &response, const Request &) {
+        const std::string answer = control.handle("USERS", ControlServer::Caller::web);
+        if (answer.starts_with("ERR ")) return send_error(response, SimpleWeb::StatusCode::server_error_internal_server_error, answer.substr(4));
+        send_json(response, json{{"users", records(ok_lines(answer), console_user)}});
+    });
+    // A profile's picture, from the console's own profile cache; 404 for a profile without one.
+    get("^/api/users/([0-9a-f]{8})/picture$", [](const Response &response, const Request &request) {
+        std::string id = request->path_match[1].str();
+        std::transform(id.begin(), id.end(), id.begin(), [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+        // avatar.png is a PNG for a picture chosen on the console, and a JPEG under the same name for one from an account.
+        const std::string picture = read_file("/system_data/priv/cache/profile/0x" + id + "/avatar.png");
+        const char *type = picture.starts_with("\x89PNG\r\n\x1a\n") ? "image/png"
+                           : picture.starts_with("\xff\xd8\xff")    ? "image/jpeg"
+                                                                    : nullptr;
+        if (!type) return send_error(response, SimpleWeb::StatusCode::client_error_not_found, "no picture");
+        send(response, SimpleWeb::StatusCode::success_ok, picture, type, {{"Cache-Control", "private, max-age=3600"}});
+    });
+    // {"uuids": [...], "trusted": true | false}: "I trust this device" and "Stop trusting" in Devices.
+    post("^/api/devices/trust$", [](const Response &response, const json &body) {
+        const auto trust = body.find("trusted");
+        if (trust == body.end() || !trust->is_boolean())
+            return send_error(response, SimpleWeb::StatusCode::client_error_bad_request, "trusted must be true or false");
+        const bool trusted = trust->get<bool>();
+        if (!change_uuid_list(response, body, "web_trusted.txt", trusted)) return;
+        BOOST_LOG(info) << "Web page: "sv << body.at("uuids").size() << " device(s) "sv << (trusted ? "trusted"sv : "no longer trusted"sv);
+        send_json(response, json{{"ok", true}});
+    });
+    // "Don't show again" on the risky setup notice: {"uuids": [...]}, the devices it stops naming. Only the notice: Devices
+    // still marks them Risky, and a device that turns risky later brings the notice back.
+    post("^/api/risk/ack$", [](const Response &response, const json &body) {
+        if (!change_uuid_list(response, body, "web_risk_ack.txt", true)) return;
+        BOOST_LOG(info) << "Web page: the risky setup notice no longer names "sv << body.at("uuids").size() << " device(s)"sv;
+        send_json(response, json{{"ok", true}});
+    });
+    // {"uuid": ..., "profiles": "free" | "none" | "unset" | ids and "guest" separated by commas}.
+    post("^/api/devices/profiles$", [&control](const Response &response, const json &body) {
+        const std::string uuid = text_field(body, "uuid"), profiles = text_field(body, "profiles");
+        const bool plain = !profiles.empty() && profiles.size() <= 200 &&
+                           std::all_of(profiles.begin(), profiles.end(), [](char c) {
+                               return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9') || c == ',';
+                           });
+        if (!word(uuid, 64) || !plain) return send_error(response, SimpleWeb::StatusCode::client_error_bad_request, "check the profiles");
+        send_answer(response, control.handle("SETPROFILES " + uuid + " " + profiles, ControlServer::Caller::web));
     });
     post("^/api/pin$", [&control](const Response &response, const json &body) {
         const std::string id = text_field(body, "id"), pin = text_field(body, "pin"), name = text_field(body, "name");

@@ -32,6 +32,12 @@ int main() {
     assert(pair.at("id") == "3" && pair.at("name") == "Living room PC" && pair.at("address") == "192.168.1.20");
     assert(pairing("4 Phone").at("address").empty());
 
+    const auto user = console_user("1b1d9381 Player One");
+    assert(user.at("id") == "1b1d9381" && user.at("name") == "Player One");
+    assert(console_user("1b1d9382").at("name").empty());
+    const auto profiles = device_profiles("ABC-1 1b1d9381,guest");
+    assert(profiles.at("uuid") == "ABC-1" && profiles.at("profiles") == "1b1d9381,guest");
+
     assert(tail("short", 100) == "short");
     assert(tail("line one\nline two\nline three\n", 15) == "line three\n");
 

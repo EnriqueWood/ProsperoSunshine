@@ -98,6 +98,20 @@ inline Record pairing(std::string_view line) {
     return record;
 }
 
+// USERS: "<id> <name>", the name the rest of the line (it may hold spaces, or be empty).
+inline Record console_user(std::string_view line) {
+    const size_t space = line.find(' ');
+    return {{"id", std::string(line.substr(0, space))},
+            {"name", space == std::string_view::npos ? std::string() : std::string(line.substr(space + 1))}};
+}
+
+// PROFILES: "<uuid> <profiles>".
+inline Record device_profiles(std::string_view line) {
+    const size_t space = line.find(' ');
+    return {{"uuid", std::string(line.substr(0, space))},
+            {"profiles", space == std::string_view::npos ? std::string() : std::string(line.substr(space + 1))}};
+}
+
 // The last `limit` bytes of a log, starting at a line.
 inline std::string tail(std::string_view text, size_t limit) {
     if (text.size() <= limit) return std::string(text);

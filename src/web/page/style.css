@@ -98,6 +98,42 @@ input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accen
 .dialog p { margin: 0 0 .75rem; overflow-wrap: anywhere; }
 .dialog-buttons { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; margin-top: 1rem; }
 
+.dialog.wide { width: min(560px, calc(100% - 32px)); }
+.choice { display: flex; gap: .6rem; align-items: flex-start; padding: .6rem 0; cursor: pointer; }
+.choice > input { margin: .25rem 0 0; width: 1.1rem; height: 1.1rem; flex: none; }
+.choice > span { display: grid; gap: .15rem; }
+.choice .muted { font-size: .9em; }
+.choice-head { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.profiles-list { display: grid; gap: .35rem; margin: 0 0 .25rem 1.7rem; }
+.profiles-list label { display: flex; gap: .5rem; align-items: center; cursor: pointer; }
+.profiles-list label input { width: 1.05rem; height: 1.05rem; margin: 0; flex: none; }
+.profiles-list label .muted { font-size: .85em; }
+.profiles-list .avatar { width: 28px; height: 28px; flex: none; border-radius: 50%; object-fit: cover; background: var(--bg); }
+.profiles-list .avatar.blank { border: 1px dashed var(--line); box-sizing: border-box; }
+.profiles-list.off { opacity: .5; }
+.profiles-list label.later { opacity: .55; cursor: default; }
+.summary { margin: .5rem 0 0; padding: .5rem .75rem; border-radius: 8px; background: var(--bg); }
+.summary.risky { border-left: 4px solid var(--danger); }
+.badge.risky { color: var(--danger); border-color: var(--danger); font-weight: 600; }
+.badge.unset { color: var(--warn); border-color: var(--warn); }
+.badge.trusted { color: var(--ok); border-color: var(--ok); font-weight: 600; }
+.badge.spectator { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+button.badge.spectator:hover { border-color: var(--accent); }
+button.badge { background: transparent; padding: .1rem .45rem; border-radius: 99px; cursor: help; }
+button.badge.risky:hover { border-color: var(--danger); }
+button.badge.trusted:hover { border-color: var(--ok); }
+.list li .why {
+  flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin: 0; padding: .45rem .65rem;
+  border-left: 4px solid var(--danger); border-radius: 6px; background: var(--bg); font-size: .9em;
+}
+.list li .why > span { flex: 1 1 240px; }
+.list li .why.unset { border-left-color: var(--warn); }
+.list li .why.trusted { border-left-color: var(--ok); }
+.list li .why.spectator { border-left-color: var(--accent); }
+.pending.risk { border-color: var(--danger); border-left-width: 4px; }
+.risk-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.risk-note { margin: 0 0 .75rem; padding: .5rem .75rem; border-left: 4px solid var(--danger); border-radius: 8px; background: var(--bg); }
+
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1rem; margin: 0; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; overflow-wrap: anywhere; }
@@ -109,6 +145,12 @@ input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accen
 }
 .list li .grow { flex: 1 1 220px; min-width: 0; }
 .list li .title { font-weight: 600; overflow-wrap: anywhere; }
+.list li button.title.link {
+  display: block; padding: 0; border: 0; background: none; text-align: left; cursor: pointer;
+  text-decoration: underline dotted; text-underline-offset: 3px;
+}
+.list li button.title.link:hover, .list li button.title.link:focus-visible { color: var(--accent); }
+.list li.flash { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); transition: box-shadow .3s; }
 .list li .sub { color: var(--muted); font-size: .9em; overflow-wrap: anywhere; }
 .list .empty { color: var(--muted); border-style: dashed; }
 .badge { font-size: .8em; padding: .1rem .45rem; border-radius: 99px; border: 1px solid var(--line); }
