@@ -34,6 +34,7 @@ run_test keyboard_pad_test
 run_test title_profile_test
 run_test listener_watch_test
 run_test device_modes_test
+run_test device_profiles_test
 run_test stream_list_test
 run_test capture_mode_test
 run_test channel_choice_test
