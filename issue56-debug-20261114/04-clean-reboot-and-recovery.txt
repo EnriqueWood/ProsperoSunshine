@@ -1,0 +1,70 @@
+Cloud recorder timestamps, America/Santiago (UTC-3). Filtered diagnostic lines; identifiers masked.
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=4 start
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=4 end
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=3 start
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] send event SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), pid=0xffffffff, phase=3 to orbis_audiod.elf
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=3 end
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=2 start
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=2 end
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=1 start
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Calling umd callback eventid=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), pid=0xffffffff, phase=1
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=1 end
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=0 start
+2026-11-14 20:47:24.618-03:00 <118>[Syscore Umd] Event id=SCE_UMD_SYSTEM_EVENT_REBOOT(0x6), phase=0 end
+2026-11-14 20:47:24.618-03:00 <118>[Syscore App] sceUmdReboot(0) => 0
+2026-11-14 20:49:49.057-03:00 <118>[AvControl] RemotePlay Status (1 -> 0) option 0x0 
+2026-11-14 20:49:49.077-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59628 ticks/ns
+2026-11-14 20:49:49.077-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture load libSceResourceArbitrator.sprx rc=0xe033 result=0
+2026-11-14 20:49:49.077-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture open start codec=0 resource=180
+2026-11-14 20:49:49.077-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture load libSceAvcap2.sprx rc=0x35 result=0
+2026-11-14 20:49:49.077-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator lookup
+2026-11-14 20:49:49.077-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator list
+2026-11-14 20:49:49.077-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator register resource=180
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture register rc=0
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator RUNNING
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture RUNNING rc=0
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture Initialize
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Initialize rc=0
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture video out mode 0x138
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture firmware 0x10200006: no rate fields, QP 30/34 at 0xc4 for 6000 kbit/s
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture OpenVideo codec=0 mode=0x138
+2026-11-14 20:49:49.078-03:00 <118>[AvControl] ** set scanin(pid=0x3c scaninId = 1 tapPoint = 0x3 appType(3) resolution(11) dynamicRange(1))
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture OpenVideo rc=0
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture open only ok, closed again
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture Stop and Close
+2026-11-14 20:49:49.078-03:00 <118>[AvControl] ** stop scanin(pid=0x3c scaninId = 1 appType(3))
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Close rc=0
+2026-11-14 20:49:49.078-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture Terminate
+2026-11-14 20:49:49.079-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Terminate rc=0
+2026-11-14 20:49:49.079-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator STOP
+2026-11-14 20:49:49.079-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture STOP rc=0
+2026-11-14 20:49:49.079-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator unregister
+2026-11-14 20:49:49.079-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture unregister rc=0
+2026-11-14 20:49:57.260-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59628 ticks/ns
+2026-11-14 20:49:57.270-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] Session app [ PS5 Screen] marked running
+2026-11-14 20:49:57.280-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] New streaming session started [active sessions: 1]
+2026-11-14 20:49:57.280-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] CLIENT CONNECTED
+2026-11-14 20:49:57.290-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+2026-11-14 20:49:57.300-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture open start codec=0 resource=180
+2026-11-14 20:49:57.300-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator list
+2026-11-14 20:49:57.310-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator register resource=180
+2026-11-14 20:49:57.310-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture register rc=0
+2026-11-14 20:49:57.310-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator RUNNING
+2026-11-14 20:49:57.321-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture RUNNING rc=0
+2026-11-14 20:49:57.321-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture Initialize
+2026-11-14 20:49:57.321-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Initialize rc=0
+2026-11-14 20:49:57.331-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture video out mode 0x138
+2026-11-14 20:49:57.331-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture firmware 0x10200006: no rate fields, QP 30/34 at 0xc4 for 1988 kbit/s
+2026-11-14 20:49:57.331-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture OpenVideo codec=0 mode=0x138
+2026-11-14 20:49:57.351-03:00 <118>[AvControl] ** set scanin(pid=0x3c scaninId = 1 tapPoint = 0x3 appType(3) resolution(11) dynamicRange(1))
+2026-11-14 20:49:57.371-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture OpenVideo rc=0
+2026-11-14 20:49:57.371-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture Start
+2026-11-14 20:49:57.371-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Start rc=0
+2026-11-14 20:49:57.391-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture first frame rc=0x8458 after 12 ms
+2026-11-14 20:49:57.392-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture first frame has 34 slices, more than hardware decoders on Windows take
+2026-11-14 20:49:57.401-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture open ok
+2026-11-14 20:49:57.412-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+2026-11-14 20:49:57.785-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture OpenAudio encoder=0
+2026-11-14 20:49:57.785-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture OpenAudio encoder=0 purpose=2 1c=0xb4 flag=0 rc=0
+2026-11-14 20:49:57.785-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture audio Start
+2026-11-14 20:49:57.785-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture audio Start rc=0

@@ -1,0 +1,28 @@
+Cloud recorder timestamps, America/Santiago (UTC-3). Filtered diagnostic lines; identifiers masked.
+2026-11-14 19:44:05.349-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] CLIENT DISCONNECTED
+2026-11-14 19:44:05.369-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture audio Stop and Close
+2026-11-14 19:44:05.369-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture audio Stop rc=0
+2026-11-14 19:44:05.389-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture audio Close rc=0
+2026-11-14 19:44:05.389-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture Stop and Close
+2026-11-14 19:44:05.409-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Stop rc=0
+2026-11-14 19:44:05.430-03:00 <118>[AvControl] ** stop scanin(pid=0x3c scaninId = 3 appType(6))
+2026-11-14 19:44:05.430-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Close rc=0
+2026-11-14 19:44:05.430-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture Terminate
+2026-11-14 19:44:05.430-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture Terminate rc=0
+2026-11-14 19:44:05.431-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator STOP
+2026-11-14 19:44:05.440-03:00 <118>[ResArbitrator][QUEUE    ]Enqueue                 [1894f]( 44)  : Enqueue(id[182], t[1], user[0] state[STOP] pid:[0xb1]) size[1]
+2026-11-14 19:44:05.440-03:00 <118>[ResArbitrator][App      ]ChangeState             [18950]( 49)  : replace id[182] state:['RUNNING'->'STOP']
+2026-11-14 19:44:05.440-03:00 <118>[ResArbitrator][IpcServer]Callback                [18950]( 78)  : S->C Callback Set(id[182] type[RESULT] result[true] state[STOP])
+2026-11-14 19:44:05.440-03:00 <118>[ResArbitrator][QUEUE    ]Remove                  [18950]( 76)  : Remove:(id[182] state[STOP] type[1]) queue.size[0]
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][IpcServer]GetCallbackDataInt      [1894f](355)  : C->S Callback Get(id[182] type[RESULT] result[true] state[STOP] cb[20072bd70])
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][App      ]Dump                    [18950](547)  : -- Exec Apps *************************
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][App      ]Dump                    [18950](556)  : -1: Id[  0] state[RUNNING] vcn[  0] scanin[-] acp[ 0] mem[  0] prio[2(2)] from[DIRECT(0x0)] user[0x0] appId[0xffffffff]
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][App      ]Dump                    [18950](564)  : -2: Id[100] state[RUNNING] vcn[  0] scanin[-] acp[ 0] mem[  0] prio[0(0)] from[IPMI(0x20ce507a0)] user[0x0] pid[0x45]
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][App      ]Dump                    [18950](564)  : -3: Id[190] state[RUNNING] vcn[  0] scanin[-] acp[ 0] mem[ 34] prio[10(10)] from[DIRECT(0x0)] user[0x0] pid[0x3a]
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][ScanIn   ]Dump                    [18950](548)  : --ScanIn mode:[1440P] 0[-1,-] 1[-1,-] 2[-1,-] 4K2K[false] Fixed4K[false] A[3,false] Cng[true] 8KReady[false]
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][App      ]Dump                    [18950](878)  : -- No kicking Apps *************************
+2026-11-14 19:44:05.441-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture STOP rc=0
+2026-11-14 19:44:05.441-03:00 <118>[ProsperoSunshine] ProsperoSunshine: -> capture ResourceArbitrator unregister
+2026-11-14 19:44:05.441-03:00 <118>[ResArbitrator][IpcServer]operator()              [1894f](261)  : RemoveCallbackList(id:182)
+2026-11-14 19:44:05.441-03:00 <118>[ProsperoSunshine] ProsperoSunshine: capture unregister rc=0
+2026-11-14 19:44:05.754-03:00 <118>[ProsperoSunshine] ProsperoSunshine: host [2] Session app [ PS5 Screen] stopped

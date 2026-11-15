@@ -1,0 +1,101 @@
+Filtered host log. Its wall clock differs from cloud recorder; see README. Identifiers masked.
+[    274] ProsperoSunshine: capture load libSceResourceArbitrator.sprx rc=0xe033 result=0
+[    316] ProsperoSunshine: capture open start codec=0 resource=180
+[    323] ProsperoSunshine: capture load libSceAvcap2.sprx rc=0x35 result=0
+[    324] ProsperoSunshine: -> capture ResourceArbitrator lookup
+[    349] ProsperoSunshine: -> capture ResourceArbitrator list
+[    355] ProsperoSunshine: -> capture ResourceArbitrator register resource=180
+[    357] ProsperoSunshine: capture register rc=0
+[    359] ProsperoSunshine: -> capture ResourceArbitrator RUNNING
+[    363] ProsperoSunshine: capture RUNNING rc=0
+[    365] ProsperoSunshine: -> capture Initialize
+[    368] ProsperoSunshine: capture Initialize rc=0
+[    371] ProsperoSunshine: capture video out mode 0x13c
+[    374] ProsperoSunshine: capture firmware 0x10200006: no rate fields, QP 30/34 at 0xc4 for 6000 kbit/s
+[    379] ProsperoSunshine: -> capture OpenVideo codec=0 mode=0x13c
+[    445] ProsperoSunshine: capture OpenVideo rc=0xffffffff
+[    447] ProsperoSunshine: capture open failed step=OpenVideo error=-1 rc=0xffffffff
+[    452] ProsperoSunshine: -> capture Terminate
+[    454] ProsperoSunshine: capture Terminate rc=0
+[    457] ProsperoSunshine: -> capture ResourceArbitrator STOP
+[    460] ProsperoSunshine: capture STOP rc=0
+[    463] ProsperoSunshine: -> capture ResourceArbitrator unregister
+[    467] ProsperoSunshine: capture unregister rc=0
+[   8885] ProsperoSunshine: capture open start codec=0 resource=180
+[   8890] ProsperoSunshine: -> capture ResourceArbitrator list
+[   8894] ProsperoSunshine: -> capture ResourceArbitrator register resource=180
+[   8896] ProsperoSunshine: capture register rc=0
+[   8900] ProsperoSunshine: -> capture ResourceArbitrator RUNNING
+[   8903] ProsperoSunshine: capture RUNNING rc=0
+[   8906] ProsperoSunshine: -> capture Initialize
+[   8909] ProsperoSunshine: capture Initialize rc=0
+[   8912] ProsperoSunshine: capture video out mode 0x13c
+[   8914] ProsperoSunshine: capture firmware 0x10200006: no rate fields, QP 30/34 at 0xc4 for 1988 kbit/s
+[   8920] ProsperoSunshine: -> capture OpenVideo codec=0 mode=0x13c
+[   8968] ProsperoSunshine: capture OpenVideo rc=0xffffffff
+[   8971] ProsperoSunshine: capture open failed step=OpenVideo error=-1 rc=0xffffffff
+[   8975] ProsperoSunshine: -> capture Terminate
+[   8978] ProsperoSunshine: capture Terminate rc=0
+[   8981] ProsperoSunshine: -> capture ResourceArbitrator STOP
+[   8984] ProsperoSunshine: capture STOP rc=0
+[   8987] ProsperoSunshine: -> capture ResourceArbitrator unregister
+[   8990] ProsperoSunshine: capture unregister rc=0
+[   8993] ProsperoSunshine: capture open start codec=0 resource=180
+[   8998] ProsperoSunshine: -> capture ResourceArbitrator list
+[   9001] ProsperoSunshine: -> capture ResourceArbitrator register resource=180
+[   9003] ProsperoSunshine: capture register rc=0
+[   9006] ProsperoSunshine: -> capture ResourceArbitrator RUNNING
+[   9010] ProsperoSunshine: capture RUNNING rc=0
+[   9012] ProsperoSunshine: -> capture Initialize
+[   9015] ProsperoSunshine: capture Initialize rc=0
+[   9018] ProsperoSunshine: capture video out mode 0x13c
+[   9021] ProsperoSunshine: capture firmware 0x10200006: no rate fields, QP 30/34 at 0xc4 for 1988 kbit/s
+[   9026] ProsperoSunshine: -> capture OpenVideo codec=0 mode=0x13c
+[   9084] ProsperoSunshine: capture OpenVideo rc=0xffffffff
+[   9088] ProsperoSunshine: capture open failed step=OpenVideo error=-1 rc=0xffffffff
+[   9093] ProsperoSunshine: -> capture Terminate
+[   9095] ProsperoSunshine: capture Terminate rc=0
+[   9098] ProsperoSunshine: -> capture ResourceArbitrator STOP
+[   9102] ProsperoSunshine: capture STOP rc=0
+[   9104] ProsperoSunshine: -> capture ResourceArbitrator unregister
+[   9108] ProsperoSunshine: capture unregister rc=0
+[   9111] ProsperoSunshine: capture H.264 slice fields: the open failed without them too, kept
+[   9371] ProsperoSunshine: capture open start codec=0 resource=180
+[   9375] ProsperoSunshine: -> capture ResourceArbitrator list
+[   9380] ProsperoSunshine: -> capture ResourceArbitrator register resource=180
+[   9382] ProsperoSunshine: capture register rc=0
+[   9385] ProsperoSunshine: -> capture ResourceArbitrator RUNNING
+[   9389] ProsperoSunshine: capture RUNNING rc=0
+[   9392] ProsperoSunshine: -> capture Initialize
+[   9395] ProsperoSunshine: capture Initialize rc=0
+[   9397] ProsperoSunshine: capture video out mode 0x13c
+[   9400] ProsperoSunshine: capture firmware 0x10200006: no rate fields, QP 30/34 at 0xc4 for 1988 kbit/s
+[   9405] ProsperoSunshine: -> capture OpenVideo codec=0 mode=0x13c
+[   9470] ProsperoSunshine: capture OpenVideo rc=0xffffffff
+[   9474] ProsperoSunshine: capture open failed step=OpenVideo error=-1 rc=0xffffffff
+[   9478] ProsperoSunshine: -> capture Terminate
+[   9481] ProsperoSunshine: capture Terminate rc=0
+[   9483] ProsperoSunshine: -> capture ResourceArbitrator STOP
+[   9487] ProsperoSunshine: capture STOP rc=0
+[   9489] ProsperoSunshine: -> capture ResourceArbitrator unregister
+[   9493] ProsperoSunshine: capture unregister rc=0
+[   9496] ProsperoSunshine: capture open start codec=0 resource=180
+[   9500] ProsperoSunshine: -> capture ResourceArbitrator list
+[   9505] ProsperoSunshine: -> capture ResourceArbitrator register resource=180
+[   9507] ProsperoSunshine: capture register rc=0
+[   9509] ProsperoSunshine: -> capture ResourceArbitrator RUNNING
+[   9513] ProsperoSunshine: capture RUNNING rc=0
+[   9515] ProsperoSunshine: -> capture Initialize
+[   9518] ProsperoSunshine: capture Initialize rc=0
+[   9521] ProsperoSunshine: capture video out mode 0x13c
+[   9524] ProsperoSunshine: capture firmware 0x10200006: no rate fields, QP 30/34 at 0xc4 for 1988 kbit/s
+[   9529] ProsperoSunshine: -> capture OpenVideo codec=0 mode=0x13c
+[   9587] ProsperoSunshine: capture OpenVideo rc=0xffffffff
+[   9589] ProsperoSunshine: capture open failed step=OpenVideo error=-1 rc=0xffffffff
+[   9590] ProsperoSunshine: -> capture Terminate
+[   9593] ProsperoSunshine: capture Terminate rc=0
+[   9596] ProsperoSunshine: -> capture ResourceArbitrator STOP
+[   9599] ProsperoSunshine: capture STOP rc=0
+[   9602] ProsperoSunshine: -> capture ResourceArbitrator unregister
+[   9605] ProsperoSunshine: capture unregister rc=0
+[   9608] ProsperoSunshine: capture H.264 slice fields: the open failed without them too, kept

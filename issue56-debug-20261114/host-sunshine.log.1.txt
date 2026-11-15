@@ -1,0 +1,10 @@
+Filtered host log. Its wall clock differs from cloud recorder; see README. Identifiers masked.
+[2026-11-14 20:07:42.104]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59626 ticks/ns
+[2026-11-14 20:07:50.698]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59626 ticks/ns
+[2026-11-14 20:07:50.702]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 20:07:50.716]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 20:07:50.719]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 20:07:50.719]: Info: CLIENT CONNECTED
+[2026-11-14 20:07:50.976]: Error: PS5 capture failed to start: -1
+[2026-11-14 20:07:51.474]: Warning: PS5 audio: capture session unavailable: -1, retrying
+[2026-11-14 20:07:51.488]: Info: Session app [ PS5 Screen] stopped

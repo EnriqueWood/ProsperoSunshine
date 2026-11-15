@@ -1,0 +1,171 @@
+Filtered host log. Its wall clock differs from cloud recorder; see README. Identifiers masked.
+[2026-11-14 14:11:04.528]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 14:15:46.728]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 14:15:46.732]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 14:15:46.746]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 14:15:46.749]: Info: CLIENT CONNECTED
+[2026-11-14 14:15:46.754]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 14:15:46.894]: Info: PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+[2026-11-14 14:17:59.407]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 14:18:02.687]: Info: PS5 capture reopened after 3274 ms
+[2026-11-14 14:42:19.335]: Info: CLIENT DISCONNECTED
+[2026-11-14 14:42:19.423]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 14:57:12.733]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 14:57:12.737]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 14:57:12.752]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 14:57:12.757]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 14:57:12.758]: Info: CLIENT CONNECTED
+[2026-11-14 14:57:12.881]: Info: PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+[2026-11-14 15:03:09.110]: Info: CLIENT DISCONNECTED
+[2026-11-14 15:03:09.497]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 15:03:11.283]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 15:03:11.286]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 15:03:11.301]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 15:03:11.307]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 15:03:11.308]: Info: CLIENT CONNECTED
+[2026-11-14 15:03:11.437]: Info: PS5 capture H.264 bitrate 14988 kbit/s (requested 14988)
+[2026-11-14 15:08:11.036]: Info: CLIENT DISCONNECTED
+[2026-11-14 15:08:11.514]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 15:34:45.763]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 15:34:45.767]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 15:34:45.781]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 15:34:45.787]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 15:34:45.789]: Info: CLIENT CONNECTED
+[2026-11-14 15:34:45.912]: Info: PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+[2026-11-14 15:37:12.564]: Info: CLIENT DISCONNECTED
+[2026-11-14 15:37:12.644]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 15:37:14.765]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 15:37:14.769]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 15:37:14.783]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 15:37:14.786]: Info: CLIENT CONNECTED
+[2026-11-14 15:37:14.790]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 15:37:14.914]: Info: PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+[2026-11-14 15:44:21.500]: Info: New streaming session started [active sessions: 2]
+[2026-11-14 15:44:21.505]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 15:44:21.506]: Info: CLIENT CONNECTED
+[2026-11-14 15:44:21.517]: Info: PS5 capture: another device joined the running stream on channel 0 (2 streams there)
+[2026-11-14 15:46:21.746]: Info: CLIENT DISCONNECTED
+[2026-11-14 15:48:03.129]: Info: CLIENT DISCONNECTED
+[2026-11-14 15:48:03.194]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 15:49:54.696]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 15:49:54.700]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 15:49:54.714]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 15:49:54.716]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 15:49:54.717]: Info: CLIENT CONNECTED
+[2026-11-14 15:49:54.839]: Info: PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+[2026-11-14 15:50:40.612]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 15:50:41.017]: Info: PS5 capture reopened after 405 ms
+[2026-11-14 15:50:45.657]: Info: CLIENT DISCONNECTED
+[2026-11-14 15:50:45.722]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 16:25:27.597]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 16:25:27.601]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 16:25:27.615]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 16:25:27.618]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 16:25:27.618]: Info: CLIENT CONNECTED
+[2026-11-14 16:25:27.745]: Info: PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+[2026-11-14 16:25:53.808]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 16:25:54.211]: Info: PS5 capture reopened after 402 ms
+[2026-11-14 16:27:44.305]: Info: CLIENT DISCONNECTED
+[2026-11-14 16:27:44.802]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 16:27:46.551]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 16:27:46.555]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 16:27:46.569]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 16:27:46.571]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 16:27:46.572]: Info: CLIENT CONNECTED
+[2026-11-14 16:27:46.706]: Info: PS5 capture H.264 bitrate 14988 kbit/s (requested 14988)
+[2026-11-14 16:28:48.774]: Info: CLIENT DISCONNECTED
+[2026-11-14 16:28:48.855]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 16:28:50.963]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 16:28:50.967]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 16:28:50.982]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 16:28:50.983]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 16:28:50.984]: Info: CLIENT CONNECTED
+[2026-11-14 16:28:51.107]: Info: PS5 capture H.264 bitrate 14988 kbit/s (requested 14988)
+[2026-11-14 16:36:29.476]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 16:36:29.893]: Info: PS5 capture reopened after 417 ms
+[2026-11-14 16:36:30.775]: Info: CLIENT DISCONNECTED
+[2026-11-14 16:36:30.862]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 17:19:54.001]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 17:19:54.005]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 17:19:54.019]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 17:19:54.021]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 17:19:54.022]: Info: CLIENT CONNECTED
+[2026-11-14 17:19:54.164]: Info: PS5 capture H.264 bitrate 1988 kbit/s (requested 1988)
+[2026-11-14 17:20:26.944]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 17:20:27.347]: Info: PS5 capture reopened after 403 ms
+[2026-11-14 17:21:08.816]: Info: CLIENT DISCONNECTED
+[2026-11-14 17:21:09.001]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 17:21:11.043]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 17:21:11.047]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 17:21:11.061]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 17:21:11.063]: Info: PS5 capture requested 3840x2160@60, delivering 3840x2160@60
+[2026-11-14 17:21:11.064]: Info: CLIENT CONNECTED
+[2026-11-14 17:21:11.968]: Info: PS5 capture HEVC HDR bitrate 50000 kbit/s (requested 78988)
+[2026-11-14 17:24:29.239]: Info: CLIENT DISCONNECTED
+[2026-11-14 17:24:29.513]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 17:24:31.432]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 17:24:31.436]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 17:24:31.455]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 17:24:31.457]: Info: PS5 capture requested 3840x2160@60, delivering 3840x2160@60
+[2026-11-14 17:24:31.458]: Info: CLIENT CONNECTED
+[2026-11-14 17:24:32.177]: Info: PS5 capture HEVC HDR bitrate 50000 kbit/s (requested 78988)
+[2026-11-14 18:15:48.543]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 18:15:52.314]: Info: PS5 capture reopened after 3765 ms
+[2026-11-14 18:15:54.470]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 18:15:58.337]: Info: PS5 capture reopened after 3860 ms
+[2026-11-14 18:27:39.039]: Info: PS5 capture: channel 0, 1 keyframe requests in 10 s: 1 likely sent before the client could have the last IDR (answered 250 ms later unless one came), 0 answered by one on its way; 1 IDRs asked for
+[2026-11-14 18:32:20.221]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 18:32:25.539]: Info: PS5 capture reopened after 5312 ms
+[2026-11-14 18:32:26.073]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 18:32:29.543]: Info: PS5 capture reopened after 3464 ms
+[2026-11-14 18:53:06.014]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 18:53:06.489]: Info: PS5 capture reopened after 474 ms
+[2026-11-14 18:53:21.233]: Info: CLIENT DISCONNECTED
+[2026-11-14 18:53:21.326]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 19:30:22.525]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 19:30:22.529]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 19:30:22.543]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 19:30:22.546]: Info: PS5 capture requested 3840x2160@60, delivering 3840x2160@60
+[2026-11-14 19:30:22.547]: Info: CLIENT CONNECTED
+[2026-11-14 19:30:22.734]: Info: PS5 capture HEVC HDR bitrate 50000 kbit/s (requested 78988)
+[2026-11-14 19:31:26.030]: Warning: PS5 capture lost (4), reopening
+[2026-11-14 19:31:26.474]: Info: PS5 capture reopened after 444 ms
+[2026-11-14 19:44:17.105]: Info: CLIENT DISCONNECTED
+[2026-11-14 19:44:17.509]: Info: Session app [ PS5 Screen] stopped
+[2026-11-14 20:03:19.426]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 20:03:19.430]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] marked running
+[2026-11-14 20:03:21.437]: Warning: Not starting PPSA18010: PPSA99002 is still open and starting another title could close it
+[2026-11-14 20:03:21.442]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] stopped
+[2026-11-14 20:03:47.685]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 20:03:47.690]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] marked running
+[2026-11-14 20:03:51.199]: Info: Started PPSA18010
+[2026-11-14 20:03:51.219]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 20:03:51.228]: Info: CLIENT CONNECTED
+[2026-11-14 20:03:51.235]: Info: PS5 capture requested 3840x2160@60, delivering 3840x2160@60
+[2026-11-14 20:03:51.689]: Error: PS5 capture failed to start: -1
+[2026-11-14 20:03:51.837]: Warning: PS5 audio: capture session unavailable: -1, retrying
+[2026-11-14 20:03:51.850]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] stopped
+[2026-11-14 20:04:35.960]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 20:04:35.968]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] resumed
+[2026-11-14 20:04:35.983]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 20:04:35.991]: Info: PS5 capture requested 3840x2160@60, delivering 3840x2160@60
+[2026-11-14 20:04:35.992]: Info: CLIENT CONNECTED
+[2026-11-14 20:04:37.691]: Error: PS5 capture failed to start: -1
+[2026-11-14 20:04:37.807]: Warning: PS5 audio: capture session unavailable: -1, retrying
+[2026-11-14 20:04:37.961]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] stopped
+[2026-11-14 20:05:54.262]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 20:05:54.266]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] resumed
+[2026-11-14 20:05:54.281]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 20:05:54.283]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 20:05:54.283]: Info: CLIENT CONNECTED
+[2026-11-14 20:05:54.508]: Error: PS5 capture failed to start: -1
+[2026-11-14 20:05:54.998]: Warning: PS5 audio: capture session unavailable: -1, retrying
+[2026-11-14 20:05:55.012]: Info: Session app [Tony Hawk's™ Pro Skater™ 3 + 4] stopped
+[2026-11-14 20:06:53.129]: Info: PS5: Avcap2 passthrough, H.264, HEVC and HEVC HDR, 640x360 to 3840x2160, TSC 1.59625 ticks/ns
+[2026-11-14 20:06:53.133]: Info: Session app [ PS5 Screen] marked running
+[2026-11-14 20:06:53.147]: Info: New streaming session started [active sessions: 1]
+[2026-11-14 20:06:53.149]: Info: PS5 capture requested 1920x1080@60, delivering 1920x1080@60
+[2026-11-14 20:06:53.150]: Info: CLIENT CONNECTED
+[2026-11-14 20:06:54.809]: Error: PS5 capture failed to start: -1
+[2026-11-14 20:06:57.135]: Warning: PS5 audio: capture session unavailable: -1, retrying
+[2026-11-14 20:06:57.149]: Info: Session app [ PS5 Screen] stopped
